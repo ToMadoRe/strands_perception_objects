@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/employees/!svn/ver/5448/aitor.aldoma/code/ros_packages/kuka_grasping/src/recognition_service
+END
+CMakeLists.txt
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/employees/!svn/ver/5435/aitor.aldoma/code/ros_packages/kuka_grasping/src/recognition_service/CMakeLists.txt
+END
+package.xml
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/employees/!svn/ver/5435/aitor.aldoma/code/ros_packages/kuka_grasping/src/recognition_service/package.xml
+END

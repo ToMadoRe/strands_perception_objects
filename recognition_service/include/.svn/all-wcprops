@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/employees/!svn/ver/5435/aitor.aldoma/code/ros_packages/kuka_grasping/src/recognition_service/include
+END
+pcl_conversions.h
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/employees/!svn/ver/5435/aitor.aldoma/code/ros_packages/kuka_grasping/src/recognition_service/include/pcl_conversions.h
+END
+segmenter.h
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/employees/!svn/ver/5435/aitor.aldoma/code/ros_packages/kuka_grasping/src/recognition_service/include/segmenter.h
+END
