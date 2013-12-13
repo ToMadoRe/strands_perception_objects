@@ -1,0 +1,1 @@
+``` rosrun recognition_service recognition_service -models_dir /home/thomas/willow_dataset/models/ -training_dir_sift /home/thomas/willow_dataset/sift_trained/ -recognizer_structure_sift /home/thomas/willow_dataset/willow_structure/ -do_sift 1 -do_ourcvfh 0 -training_dir_ourcvfh /home/thomas/willow_dataset/ourcvfh_trained/ -chop_z 1.2 -icp_iterations 10```
