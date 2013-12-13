@@ -31,7 +31,7 @@
 #include <faat_pcl/3d_rec_framework/feature_wrapper/global/organized_color_ourcvfh_estimator.h>
 #include <faat_pcl/3d_rec_framework/pipeline/global_nn_recognizer_cvfh.h>
 #include <faat_pcl/3d_rec_framework/utils/metrics.h>
-#include "recognition_service/recognize.h"
+#include "recognizer_msg_and_services/recognize.h"
 #include <pcl/apps/dominant_plane_segmentation.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
@@ -73,7 +73,7 @@ private:
 #endif
 
   bool
-  recognize (recognition_service::recognize::Request & req, recognition_service::recognize::Response & response)
+  recognize (recognizer_msg_and_services::recognize::Request & req, recognizer_msg_and_services::recognize::Response & response)
   {
     typedef faat_pcl::rec_3d_framework::Model<PointT> ModelT;
     typedef boost::shared_ptr<ModelT> ModelTPtr;

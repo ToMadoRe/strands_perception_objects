@@ -5,8 +5,7 @@ SET (CMAKE_BUILD_TYPE RelWithDebInfo)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy message_generation sensor_msgs std_msgs recognizer_msg_and_services)
-
+find_package(catkin REQUIRED COMPONENTS roscpp rospy sensor_msgs std_msgs recognizer_msg_and_services)
 
 set(PCL_DIR CACHE PATH "pcl directory")
 find_package(PCL REQUIRED)
@@ -16,7 +15,7 @@ find_package(PCL REQUIRED)
 
 find_package( OpenCV 2.4 REQUIRED )
 
-link_directories(${FAAT_PCL_DIR}/build/lib/)
+link_directories(${FAAT_PCL_DIR}/qtcreator-build/lib/)
 include_directories(${PCL_INCLUDE_DIRS}
                     ${FAAT_PCL_DIR}/3d_rec_framework/include/
                     ${FAAT_PCL_DIR}/utils/include/
@@ -40,18 +39,25 @@ set(FAAT_PCL_LIBRARIES faat_pcl_3d_rec_frameworkrd faat_pcl_utilsrd faat_pcl_rec
 ## Declare ROS messages and services ##
 #######################################
 
+## Generate messages in the 'msg' folder
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
+
 ## Generate services in the 'srv' folder
-add_service_files(
-  FILES
-  recognize.srv
-)
+# add_service_files(
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  sensor_msgs
-  #   std_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   sensor_msgs#   std_msgs
+# )
 
 ###################################
 ## catkin specific configuration ##
