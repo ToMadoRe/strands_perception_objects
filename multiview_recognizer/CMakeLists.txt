@@ -4,11 +4,7 @@ project(multiview_recognizer)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-#   visual_recognizer/
-#   message_generation
-)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs scitos_apps_msgs)
 find_package(PCL 1.7 REQUIRED)
 find_package( OpenCV 2.4 REQUIRED )
 
@@ -61,8 +57,7 @@ set(FAAT_PCL_DIR_BUILD CACHE PATH "FAAT PCL DIR BUILD")
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES multiview_recognizer
-CATKIN_DEPENDS roscpp visual_recognizer/
-#  DEPENDS system_lib
+CATKIN_DEPENDS roscpp recognition_service sensor_msgs scitos_apps_msgs
 )
 
 ###########
@@ -84,6 +79,9 @@ include_directories(
   ${FAAT_PCL_DIR}/3d_rec_framework/include
   ${catkin_INCLUDE_DIRS} 
 )
+
+get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
+message("inc_dirs = ${inc_dirs}")
 
 link_directories(${PCL_LINK_DIRECTORIES} ${FAAT_PCL_DIR_BUILD}/lib)
 add_definitions(${PCL_DEFINITIONS})

@@ -17,5 +17,7 @@ int main (int argc, char **argv)
 { 
   multiviewGraph myGraph;
   myGraph.init(argc, argv);
+  ROS_INFO("Starting rec");
+  //myGraph.recognize();
   return 0;
 }
