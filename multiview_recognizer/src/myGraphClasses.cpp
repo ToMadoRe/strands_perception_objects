@@ -48,7 +48,7 @@ getFilesInDirect ( bf::path & dir, std::string & rel_path_so_far, std::vector<st
 
 
 
-std::vector<Vertex>
+std::vector<Vertex> multiviewGraph::
 my_node_reader ( std::string filename, Graph &g )
 {
     std::string fn, model_id, line, tf_str, origin, verified;
@@ -210,7 +210,7 @@ struct my_graph_writer
     }
 } myGraphWrite;
 
-void
+void multiviewGraph::
 outputgraph ( Graph& map, const char* filename )
 {
     std::ofstream gout;
@@ -274,18 +274,7 @@ createBigPointCloudRecursive ( Graph & grph_final, pcl::PointCloud<pcl::PointXYZ
     }
 }
 
-// View::View(const View &view)
-// {
-//     pScenePCl = view.pScenePCl;
-//     pScenePCl_f = view.pScenePCl_f;
-//     pScenePCl_f_ds = view.pScenePCl_f_ds;
-//     pSceneNormal = view.pSceneNormal;
-//     scene_filename = view.scene_filename;
-//     hypothesis = view.hypothesis;
-// }
-
-
-void
+void  multiviewGraph::
 createBigPointCloud ( Graph & grph_final, pcl::PointCloud<pcl::PointXYZRGB>::Ptr & big_cloud )
 {
     std::pair<vertex_iter, vertex_iter> vp;
@@ -297,7 +286,7 @@ createBigPointCloud ( Graph & grph_final, pcl::PointCloud<pcl::PointXYZRGB>::Ptr
     createBigPointCloudRecursive ( grph_final, big_cloud, *vp.first, *vp.first, accum );
 }
 
-bool
+bool multiviewGraph::
 calcFeatures ( Vertex &src, Graph &grph )
 {
     boost::shared_ptr < faat_pcl::rec_3d_framework::SIFTLocalEstimation<PointT, FeatureT> > estimator;
@@ -322,7 +311,7 @@ calcFeatures ( Vertex &src, Graph &grph )
      vis_temp->spin ();*/
 }
 
-void transformNormals ( pcl::PointCloud<pcl::Normal>::Ptr & normals_cloud,
+void transformNormals ( const pcl::PointCloud<pcl::Normal>::ConstPtr & normals_cloud,
                         pcl::PointCloud<pcl::Normal>::Ptr & normals_aligned,
                         Eigen::Matrix4f & transform )
 {
@@ -472,7 +461,7 @@ void computeTablePlane ( const boost::shared_ptr<const pcl::PointCloud<pcl::Poin
 
 
 void
-filterPCl ( pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr pInputCloud, boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB> > pOutputCloud,
+filterPCl ( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr pInputCloud, boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB> > pOutputCloud,
             float dist )
 {
     Eigen::Vector4f table_plane;
@@ -541,7 +530,7 @@ template void
 multiview::convertToFLANN<pcl::Histogram<128> > ( pcl::PointCloud<pcl::Histogram<128> >::Ptr & cloud, flann::Matrix<float> &data ); // explicit instantiation.
 
 
-void
+void multiviewGraph::
 estimateViewTransformationBySIFT ( const Vertex &src, const Vertex &trgt, Graph &grph, flann::Index<DistT> *flann_index, Eigen::Matrix4f &transformation,
                                    Edge &edge )
 {
@@ -598,7 +587,7 @@ estimateViewTransformationBySIFT ( const Vertex &src, const Vertex &trgt, Graph 
 //      vis_temp2->spin ();
 }
 
-void
+void multiviewGraph::
 selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edges, const Graph &grph, std::vector<Edge> &single_edges )
 {
     for ( size_t edgeVec_id = 0; edgeVec_id < parallel_edges.size (); edgeVec_id++ )
@@ -630,7 +619,7 @@ selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edg
     }
 }
 
-void
+void multiviewGraph::
 extendHypothesis ( Graph &grph )
 {
     bool something_has_been_updated = true;
@@ -687,7 +676,7 @@ extendHypothesis ( Graph &grph )
     }
 }
 
-void
+void multiviewGraph::
 calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &edges_final )
 {
     GraphMST grphMST;
@@ -748,7 +737,7 @@ calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &
     }
 }
 
-void
+void multiviewGraph::
 createEdgesFromHypothesisMatch ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges )
 {
     for ( std::vector<Vertex>::const_iterator it_vrtxA = vertices_v.begin (); it_vrtxA != vertices_v.end (); ++it_vrtxA )
@@ -783,7 +772,7 @@ createEdgesFromHypothesisMatch ( const std::vector<Vertex> &vertices_v, Graph &g
     }
 }
 
-void
+void multiviewGraph::
 createEdgesFromHypothesisMatchOnline ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges )
 {
     for ( std::vector<Vertex>::const_iterator it_vrtxA = vertices_v.begin (); it_vrtxA != vertices_v.end () - 1; ++it_vrtxA )
@@ -818,10 +807,10 @@ createEdgesFromHypothesisMatchOnline ( const std::vector<Vertex> &vertices_v, Gr
 View::View ()
 {
     pScenePCl.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
-    pScenePCl_f.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
+    //pScenePCl_f.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
     pSceneNormals.reset ( new pcl::PointCloud<pcl::Normal> );
-    pSceneXYZRGBNormal.reset ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
-    pScenePCl_f_ds.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
+//    pSceneXYZRGBNormal.reset ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
+    //pScenePCl_f_ds.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
     pIndices_above_plane.reset ( new pcl::PointIndices );
     pSignatures.reset ( new pcl::PointCloud<FeatureT> );
 }
@@ -835,7 +824,7 @@ Hypothesis::Hypothesis ( std::string model_id, Eigen::Matrix4f transform, std::s
     verified_ = verified;
 }
 
-void
+void multiviewGraph::
 calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
 {
     //----calculate-edge-weight---------------------------------------------------------
@@ -844,12 +833,11 @@ calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
     for ( size_t edge_id = 0; edge_id < edges.size (); edge_id++ ) //std::vector<Edge>::iterator edge_it = edges.begin(); edge_it!=edges.end(); ++edge_it)
     {
 
-        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pTargetNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
-        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSourceNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
+//        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pTargetNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
+//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
+//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
+//        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSourceNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
 
-        pcl::PointCloud<pcl::PointXYZ>::Ptr unusedCloud ( new pcl::PointCloud<pcl::PointXYZ> );
 
         double edge_weight;
         Vertex vrtx_src, vrtx_trgt;
@@ -868,8 +856,8 @@ calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
 
         float w_after_icp_ = std::numeric_limits<float>::max ();
 
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
+//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
+//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
 
         float best_overlap_ = 0.75f;
         Eigen::Matrix4f icp_trans;
@@ -893,8 +881,8 @@ calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
             w_after_icp_ = best_overlap_ - w_after_icp_;
         }
 
-        pcl::transformPointCloudWithNormals ( * ( grph[vrtx_src].pSceneXYZRGBNormal ), *pTargetNormalPCl, icp_trans );
-        pcl::copyPointCloud ( * ( grph[vrtx_trgt].pSceneXYZRGBNormal ), *pSourceNormalPCl );
+//        pcl::transformPointCloudWithNormals ( * ( grph[vrtx_src].pSceneXYZRGBNormal ), *pTargetNormalPCl, icp_trans );
+//        pcl::copyPointCloud ( * ( grph[vrtx_trgt].pSceneXYZRGBNormal ), *pSourceNormalPCl );
 
         if ( grph[edges[edge_id]].source_id == boost::get ( vertex_index, grph, vrtx_src ) )
         {
@@ -934,7 +922,7 @@ calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
     }
 }
 
-double
+double multiviewGraph::
 calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,
                        pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr pOctree, int K, double beta )
 {
@@ -1033,7 +1021,7 @@ calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormal
     return overlap / static_cast<float> ( n_points_used );
 }
 
-double
+double multiviewGraph::
 calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,
                        pcl::search::OrganizedNeighbor<pcl::PointXYZRGB>::Ptr pOrganizedNeighbor, int K, double beta )
 {
@@ -1128,7 +1116,7 @@ calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormal
     return overlap / static_cast<float> ( n_points_used );
 }
 
-double
+double multiviewGraph::
 calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,
                        std::vector<int> & unused, double beta )
 {

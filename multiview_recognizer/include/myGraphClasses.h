@@ -76,6 +76,7 @@ typedef boost::shared_ptr< PointInT > PointInTPtr;
 typedef pcl::PointXYZRGB PointT;
 typedef pcl::Histogram<128> FeatureT;
 typedef flann::L1<float> DistT;
+
 class Hypothesis
 {
 public:
@@ -93,10 +94,10 @@ public:
     //View(const View &view);
     int foo;
     boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pScenePCl;
-    boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGBNormal> > pSceneXYZRGBNormal;
+//    boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGBNormal> > pSceneXYZRGBNormal;
     boost::shared_ptr< pcl::PointCloud<pcl::Normal> > pSceneNormals;
-    boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pScenePCl_f; //no table plane
-    boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pScenePCl_f_ds;
+    //boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pScenePCl_f; //no table plane
+    //boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pScenePCl_f_ds;
     boost::shared_ptr< pcl::PointCloud<FeatureT > > pSignatures;
     boost::shared_ptr< pcl::PointIndices > pIndices_above_plane;
     boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pKeypoints;
@@ -135,26 +136,11 @@ typedef property_map<Graph, vertex_index_t>::type IndexMap;
 typedef faat_pcl::rec_3d_framework::Model<PointT> ModelT;
 typedef boost::shared_ptr<ModelT> ModelTPtr;
 typedef typename pcl::PointCloud<PointT>::ConstPtr ConstPointInTPtr;
-std::vector<Vertex> my_node_reader ( std::string filename, Graph &g );
-void createBigPointCloud ( Graph & grph_final,
-                           pcl::PointCloud<pcl::PointXYZRGB>::Ptr & big_cloud );
 
-bool calcFeatures ( Vertex &src, Graph &grph );
-void estimateViewTransformationBySIFT ( const Vertex &src, const Vertex &trgt, Graph &grph, flann::Index<DistT > *flann_index, Eigen::Matrix4f &transformation, Edge &edge );
-void selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edges, const Graph &grph, std::vector<Edge> &single_edges );
-void extendHypothesis ( Graph &grph );
-void calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &edges_final );
-void createEdgesFromHypothesisMatch ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges );
-void calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph);
-double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr pOctree, int K=1, double beta = 0.2 );
-double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl, pcl::search::OrganizedNeighbor<pcl::PointXYZRGB>::Ptr pOrganizedNeighbor, int K=1, double beta=0.2 );
-double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl,
-                              pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,
-                              std::vector<int> & unused, double beta=0.2 );
 void
 getFilesInDirect (bf::path & dir, std::string & rel_path_so_far, std::vector<std::string> & relative_paths, std::string & ext);
 std::vector<int> visualization_framework ( pcl::visualization::PCLVisualizer::Ptr vis, int number_of_views, int number_of_subwindows_per_view );
-void transformNormals(pcl::PointCloud<pcl::Normal>::Ptr & normals_cloud,
+void transformNormals(const pcl::PointCloud<pcl::Normal>::ConstPtr & normals_cloud,
                       pcl::PointCloud<pcl::Normal>::Ptr & normals_aligned,
                       Eigen::Matrix4f & transform);
 void computeTablePlane (const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZRGB> > & xyz_points, Eigen::Vector4f & table_plane, float z_dist=1.2f);
@@ -205,6 +191,20 @@ public:
     void kinectCallback ( const sensor_msgs::PointCloud2& msg );
     int recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const std::string scene_name = std::string() );
     void init ( int argc, char **argv );
+    bool calcFeatures ( Vertex &src, Graph &grph );
+    void estimateViewTransformationBySIFT ( const Vertex &src, const Vertex &trgt, Graph &grph, flann::Index<DistT > *flann_index, Eigen::Matrix4f &transformation, Edge &edge );
+    void selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edges, const Graph &grph, std::vector<Edge> &single_edges );
+    void extendHypothesis ( Graph &grph );
+    void calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &edges_final );
+    void createEdgesFromHypothesisMatch ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges );
+    void createEdgesFromHypothesisMatchOnline ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges );
+    void calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph);
+    double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl, pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr pOctree, int K=1, double beta = 0.2 );
+    double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl, pcl::search::OrganizedNeighbor<pcl::PointXYZRGB>::Ptr pOrganizedNeighbor, int K=1, double beta=0.2 );
+    double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl, std::vector<int> & unused, double beta=0.2 );
+    void outputgraph ( Graph& map, const char* filename );
+    std::vector<Vertex> my_node_reader ( std::string filename, Graph &g );
+    void createBigPointCloud ( Graph & grph_final, pcl::PointCloud<pcl::PointXYZRGB>::Ptr & big_cloud );
 };
 
 
