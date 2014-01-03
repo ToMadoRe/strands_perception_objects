@@ -61,7 +61,6 @@ private:
   std::string training_dir_ourcvfh_;
   bool do_sift_;
   bool do_ourcvfh_;
-  float chop_at_z_;
   int icp_iterations_;
   std::vector<std::string> text_3d_;
   boost::shared_ptr<faat_pcl::rec_3d_framework::MultiRecognitionPipeline<PointT> > multi_recog_;
@@ -85,7 +84,7 @@ private:
     float go_resolution_ = 0.005f;
     bool add_planes = true;
     float assembled_resolution = 0.003f;
-    float color_sigma = 0.5f;
+    float color_sigma = 0.25f;
 
     //initialize go
     boost::shared_ptr<faat_pcl::GlobalHypothesesVerification_1<PointT, PointT> > go (
@@ -111,15 +110,6 @@ private:
     go->setUseSuperVoxels(false);
 
     typename pcl::PointCloud<PointT>::Ptr occlusion_cloud (new pcl::PointCloud<PointT>(*scene));
-    if(chop_at_z_ > 0)
-    {
-        pcl::PassThrough<PointT> pass_;
-        pass_.setFilterLimits (0.f, chop_at_z_);
-        pass_.setFilterFieldName ("z");
-        pass_.setInputCloud (scene);
-        pass_.setKeepOrganized (true);
-        pass_.filter (*scene);
-    }
 
     pcl::PointCloud<pcl::Normal>::Ptr normal_cloud (new pcl::PointCloud<pcl::Normal>);
     pcl::NormalEstimationOMP<PointT, pcl::Normal> ne;
@@ -347,7 +337,6 @@ public:
   Recognizer ()
   {
     //default values
-    chop_at_z_ = 1.f;
     do_sift_ = true;
     do_ourcvfh_ = false;
     icp_iterations_ = 0;
@@ -368,7 +357,6 @@ public:
     pcl::console::parse_argument (argc, argv, "-training_dir_sift", training_dir_sift_);
     pcl::console::parse_argument (argc, argv, "-recognizer_structure_sift", sift_structure_);
     pcl::console::parse_argument (argc, argv, "-training_dir_ourcvfh", training_dir_ourcvfh_);
-    pcl::console::parse_argument (argc, argv, "-chop_z", chop_at_z_);
     pcl::console::parse_argument (argc, argv, "-icp_iterations", icp_iterations_);
     pcl::console::parse_argument (argc, argv, "-do_sift", do_sift_);
     pcl::console::parse_argument (argc, argv, "-do_ourcvfh", do_ourcvfh_);

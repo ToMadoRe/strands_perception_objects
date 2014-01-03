@@ -5,7 +5,7 @@ SET (CMAKE_BUILD_TYPE RelWithDebInfo)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy message_generation sensor_msgs std_msgs recognizer_msg_and_services)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy message_generation sensor_msgs std_msgs)
 
 
 set(PCL_DIR CACHE PATH "pcl directory")
