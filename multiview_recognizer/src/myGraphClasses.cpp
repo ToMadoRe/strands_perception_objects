@@ -48,105 +48,105 @@ getFilesInDirect ( bf::path & dir, std::string & rel_path_so_far, std::vector<st
 
 
 
-std::vector<Vertex> multiviewGraph::
-my_node_reader ( std::string filename, Graph &g )
-{
-    std::string fn, model_id, line, tf_str, origin, verified;
-    Eigen::Matrix4f tf;
-    std::ifstream myfile;
-    std::vector<Vertex> vertices_temp_v;
+//std::vector<Vertex> multiviewGraph::
+//my_node_reader ( std::string filename, Graph &g )
+//{
+//    std::string fn, model_id, line, tf_str, origin, verified;
+//    Eigen::Matrix4f tf;
+//    std::ifstream myfile;
+//    std::vector<Vertex> vertices_temp_v;
 
-    myfile.open ( filename.c_str () );
+//    myfile.open ( filename.c_str () );
 
-    if ( myfile.is_open () )
-    {
-        while ( myfile.good () )
-        {
-            std::getline ( myfile, line );
+//    if ( myfile.is_open () )
+//    {
+//        while ( myfile.good () )
+//        {
+//            std::getline ( myfile, line );
 
-            int found = -1;
-            std::string searchstring ( "[file=\"" );
-            found = line.find ( searchstring );
+//            int found = -1;
+//            std::string searchstring ( "[file=\"" );
+//            found = line.find ( searchstring );
 
-            if ( found > -1 )
-            {
-                Vertex v = boost::add_vertex ( g );
-                vertices_temp_v.push_back ( v );
+//            if ( found > -1 )
+//            {
+//                Vertex v = boost::add_vertex ( g );
+//                vertices_temp_v.push_back ( v );
 
-                fn = line.substr ( found + searchstring.length () );
-                fn.erase ( fn.end () - 2, fn.end () );
+//                fn = line.substr ( found + searchstring.length () );
+//                fn.erase ( fn.end () - 2, fn.end () );
 
-                int read_state = 0;
-                while ( myfile.good () && read_state > -1 )
-                {
-                    std::getline ( myfile, line );
+//                int read_state = 0;
+//                while ( myfile.good () && read_state > -1 )
+//                {
+//                    std::getline ( myfile, line );
 
-                    searchstring = ";";
-                    found = line.find ( searchstring );
-                    if ( found > -1 )
-                    {
-                        read_state = -1;
-                        break;
-                    }
-                    else
-                    {
-                        searchstring = "[hypothesis_model_id=\"";
-                        found = line.find ( searchstring );
-                        if ( found > -1 )
-                        {
-                            model_id = line.substr ( found + searchstring.length () );
-                            model_id.erase ( model_id.end () - 2, model_id.end () );
-                            read_state++;
-                        }
+//                    searchstring = ";";
+//                    found = line.find ( searchstring );
+//                    if ( found > -1 )
+//                    {
+//                        read_state = -1;
+//                        break;
+//                    }
+//                    else
+//                    {
+//                        searchstring = "[hypothesis_model_id=\"";
+//                        found = line.find ( searchstring );
+//                        if ( found > -1 )
+//                        {
+//                            model_id = line.substr ( found + searchstring.length () );
+//                            model_id.erase ( model_id.end () - 2, model_id.end () );
+//                            read_state++;
+//                        }
 
-                        searchstring = "[hypothesis_transform=\"";
-                        found = line.find ( searchstring );
-                        if ( found > -1 )
-                        {
-                            tf_str = line.substr ( found + searchstring.length () );
-                            tf_str.erase ( tf_str.end () - 2, tf_str.end () );
+//                        searchstring = "[hypothesis_transform=\"";
+//                        found = line.find ( searchstring );
+//                        if ( found > -1 )
+//                        {
+//                            tf_str = line.substr ( found + searchstring.length () );
+//                            tf_str.erase ( tf_str.end () - 2, tf_str.end () );
 
-                            std::stringstream ( tf_str ) >> tf ( 0, 0 ) >> tf ( 0, 1 ) >> tf ( 0, 2 ) >> tf ( 0, 3 ) >> tf ( 1, 0 ) >> tf ( 1, 1 ) >> tf ( 1, 2 ) >> tf ( 1, 3 )
-                                                         >> tf ( 2, 0 ) >> tf ( 2, 1 ) >> tf ( 2, 2 ) >> tf ( 2, 3 ) >> tf ( 3, 0 ) >> tf ( 3, 1 ) >> tf ( 3, 2 ) >> tf ( 3, 3 );
-                            read_state++;
+//                            std::stringstream ( tf_str ) >> tf ( 0, 0 ) >> tf ( 0, 1 ) >> tf ( 0, 2 ) >> tf ( 0, 3 ) >> tf ( 1, 0 ) >> tf ( 1, 1 ) >> tf ( 1, 2 ) >> tf ( 1, 3 )
+//                                                         >> tf ( 2, 0 ) >> tf ( 2, 1 ) >> tf ( 2, 2 ) >> tf ( 2, 3 ) >> tf ( 3, 0 ) >> tf ( 3, 1 ) >> tf ( 3, 2 ) >> tf ( 3, 3 );
+//                            read_state++;
 
-                        }
-                        searchstring = "[hypothesis_origin=\"";
-                        found = line.find ( searchstring );
-                        if ( found > -1 )
-                        {
-                            origin = line.substr ( found + searchstring.length () );
-                            origin.erase ( origin.end () - 2, origin.end () );
-                            read_state++;
+//                        }
+//                        searchstring = "[hypothesis_origin=\"";
+//                        found = line.find ( searchstring );
+//                        if ( found > -1 )
+//                        {
+//                            origin = line.substr ( found + searchstring.length () );
+//                            origin.erase ( origin.end () - 2, origin.end () );
+//                            read_state++;
 
-                            searchstring = "[hypothesis_verified=\"";
-                            found = line.find ( searchstring );
-                            if ( found > -1 )
-                            {
-                                verified = line.substr ( found + searchstring.length () );
-                                verified.erase ( verified.end () - 2, verified.end () );
-                                read_state++;
-                            }
-                        }
-                    }
-                    if ( read_state >= 4 )
-                    {
-                        read_state = 0;
-                        Hypothesis hypothesis ( model_id, tf, origin, false, atoi ( verified.c_str() ) );
-                        g[v].hypothesis.push_back ( hypothesis );
+//                            searchstring = "[hypothesis_verified=\"";
+//                            found = line.find ( searchstring );
+//                            if ( found > -1 )
+//                            {
+//                                verified = line.substr ( found + searchstring.length () );
+//                                verified.erase ( verified.end () - 2, verified.end () );
+//                                read_state++;
+//                            }
+//                        }
+//                    }
+//                    if ( read_state >= 4 )
+//                    {
+//                        read_state = 0;
+//                        Hypothesis hypothesis ( model_id, tf, origin, false, atoi ( verified.c_str() ) );
+//                        g[v].hypothesis.push_back ( hypothesis );
 
-                        g[v].scene_filename = fn;
-                        g[v].pScenePCl.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
-                        pcl::io::loadPCDFile ( g[v].scene_filename, * ( g[v].pScenePCl ) );
+//                        g[v].scene_filename = fn;
+//                        g[v].pScenePCl.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
+//                        pcl::io::loadPCDFile ( g[v].scene_filename, * ( g[v].pScenePCl ) );
 
-                    }
-                }
-            }
-        }
-        myfile.close ();
-    }
-    return vertices_temp_v;
-}
+//                    }
+//                }
+//            }
+//        }
+//        myfile.close ();
+//    }
+//    return vertices_temp_v;
+//}
 
 struct my_node_writer
 {
@@ -159,10 +159,10 @@ struct my_node_writer
     void
     operator() ( std::ostream& out, Vertex v )
     {
-        out << " [label=\"" << boost::get ( vertex_index, g, v ) << "(" << boost::filesystem::path ( g[v].scene_filename ).stem ().string () << ")\"]"
+        out << " [label=\"" << g[v].scene_filename_ << "(" << boost::filesystem::path ( g[v].scene_filename_ ).stem ().string () << ")\"]"
             << std::endl;
-        out << " [file=\"" << g[v].scene_filename << "\"]" << std::endl;
-        out << " [index=\"" << boost::get ( vertex_index, g, v ) << "\"]" << std::endl;
+        out << " [file=\"" << g[v].scene_filename_ << "\"]" << std::endl;
+        out << " [index=\"" << g[v].scene_filename_ << "\"]" << std::endl;
 
         for ( std::vector<Hypothesis>::iterator it_hyp = g[v].hypothesis.begin (); it_hyp != g[v].hypothesis.end (); ++it_hyp )
         {
@@ -253,7 +253,7 @@ createBigPointCloudRecursive ( Graph & grph_final, pcl::PointCloud<pcl::PointXYZ
         Vertex src = boost::source ( e, grph_final );
         Vertex targ = boost::target ( e, grph_final );
         Eigen::Matrix4f transform;
-        if ( grph_final[e].source_id == boost::get ( vertex_index, grph_final, src ) )
+        if ( grph_final[e].source_id.compare( grph_final[src].scene_filename_ ) == 0)
         {
             PCL_WARN ( "inverse" );
             transform = grph_final[e].transformation.inverse ();
@@ -323,11 +323,11 @@ void transformNormals ( const pcl::PointCloud<pcl::Normal>::ConstPtr & normals_c
     {
         Eigen::Vector3f nt ( normals_cloud->points[k].normal_x, normals_cloud->points[k].normal_y, normals_cloud->points[k].normal_z );
         normals_aligned->points[k].normal_x = static_cast<float> ( transform ( 0, 0 ) * nt[0] + transform ( 0, 1 ) * nt[1]
-                                              + transform ( 0, 2 ) * nt[2] );
+                + transform ( 0, 2 ) * nt[2] );
         normals_aligned->points[k].normal_y = static_cast<float> ( transform ( 1, 0 ) * nt[0] + transform ( 1, 1 ) * nt[1]
-                                              + transform ( 1, 2 ) * nt[2] );
+                + transform ( 1, 2 ) * nt[2] );
         normals_aligned->points[k].normal_z = static_cast<float> ( transform ( 2, 0 ) * nt[0] + transform ( 2, 1 ) * nt[1]
-                                              + transform ( 2, 2 ) * nt[2] );
+                + transform ( 2, 2 ) * nt[2] );
     }
 }
 
@@ -367,8 +367,8 @@ void computeTablePlane ( const boost::shared_ptr<const pcl::PointCloud<pcl::Poin
     std::vector<pcl::PointIndices> boundary_indices;
 
     pcl::PlaneRefinementComparator<pcl::PointXYZRGB, pcl::Normal, pcl::Label>::Ptr ref_comp (
-        new pcl::PlaneRefinementComparator<pcl::PointXYZRGB,
-        pcl::Normal, pcl::Label> () );
+                new pcl::PlaneRefinementComparator<pcl::PointXYZRGB,
+                pcl::Normal, pcl::Label> () );
     ref_comp->setDistanceThreshold ( 0.01f, true );
     ref_comp->setAngularThreshold ( 0.017453 * 10 );
     mps.setRefinementComparator ( ref_comp );
@@ -384,7 +384,7 @@ void computeTablePlane ( const boost::shared_ptr<const pcl::PointCloud<pcl::Poin
     for ( size_t i = 0; i < model_coefficients.size (); i++ )
     {
         Eigen::Vector4f table_plane = Eigen::Vector4f ( model_coefficients[i].values[0], model_coefficients[i].values[1], model_coefficients[i].values[2],
-                                      model_coefficients[i].values[3] );
+                model_coefficients[i].values[3] );
 
         std::cout << "Number of inliers for this plane:" << inlier_indices[i].indices.size () << std::endl;
         int remaining_points = 0;
@@ -419,10 +419,10 @@ void computeTablePlane ( const boost::shared_ptr<const pcl::PointCloud<pcl::Poin
 
     size_t itt = static_cast<size_t> ( table_plane_selected );
     table_plane = Eigen::Vector4f ( model_coefficients[itt].values[0], model_coefficients[itt].values[1], model_coefficients[itt].values[2],
-                                    model_coefficients[itt].values[3] );
+            model_coefficients[itt].values[3] );
 
     Eigen::Vector3f normal_table = Eigen::Vector3f ( model_coefficients[itt].values[0], model_coefficients[itt].values[1],
-                                   model_coefficients[itt].values[2] );
+            model_coefficients[itt].values[2] );
 
     int inliers_count_best = plane_inliers_counts[itt];
 
@@ -430,7 +430,7 @@ void computeTablePlane ( const boost::shared_ptr<const pcl::PointCloud<pcl::Poin
     for ( size_t i = 0; i < model_coefficients.size (); i++ )
     {
         Eigen::Vector4f model = Eigen::Vector4f ( model_coefficients[i].values[0], model_coefficients[i].values[1], model_coefficients[i].values[2],
-                                model_coefficients[i].values[3] );
+                model_coefficients[i].values[3] );
 
         Eigen::Vector3f normal = Eigen::Vector3f ( model_coefficients[i].values[0], model_coefficients[i].values[1], model_coefficients[i].values[2] );
 
@@ -474,7 +474,7 @@ filterPCl ( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr pInputCloud, boost
     pass.setKeepOrganized ( true );
     pass.filter ( *pOutputCloud );
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for ( size_t kk = 0; kk < pOutputCloud->points.size (); kk++ )
     {
         Eigen::Vector3f xyz_p = pOutputCloud->points[kk].getVector3fMap ();
@@ -539,7 +539,7 @@ estimateViewTransformationBySIFT ( const Vertex &src, const Vertex &trgt, Graph 
     flann::Matrix<float> distances = flann::Matrix<float> ( new float[K], 1, K );
 
     pcl::CorrespondencesPtr temp_correspondences ( new pcl::Correspondences );
-    ROS_INFO ( "Calculate transform via SIFT between scene %s and %s for a keypoint size of %ld", grph[src].scene_filename.c_str(), grph[trgt].scene_filename.c_str(), grph[src].pKeypoints->size () );
+    PCL_INFO ( "Calculate transform via SIFT between scene %s and %s for a keypoint size of %ld", grph[src].scene_filename_.c_str(), grph[trgt].scene_filename_.c_str(), grph[src].pKeypoints->size () );
     for ( size_t keypointId = 0; keypointId < grph[src].pKeypoints->size (); keypointId++ )
     {
         FeatureT searchFeature = grph[src].pSignatures->at ( keypointId );
@@ -571,53 +571,140 @@ estimateViewTransformationBySIFT ( const Vertex &src, const Vertex &trgt, Graph 
 
     bool b;
     tie ( edge, b ) = add_edge ( trgt, src, grph );
-    grph[edge].transformation = transformation.inverse ();
+    grph[edge].transformation = transformation;
     grph[edge].model_name = std::string ( "scene_to_scene" );
-    grph[edge].source_id = boost::get ( vertex_index, grph, trgt );
-    grph[edge].target_id = boost::get ( vertex_index, grph, src );
+    grph[edge].source_id = grph[src].scene_filename_;
+    grph[edge].target_id = grph[trgt].scene_filename_;
 
 
-//      pcl::visualization::PCLVisualizer::Ptr vis_temp2 (new pcl::visualization::PCLVisualizer);
-//      pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified (grph[trgt].pScenePCl);
-//      vis_temp2->addPointCloud<pcl::PointXYZRGB> (grph[trgt].pScenePCl, handler_rgb_verified, "Hypothesis_1");
-//      PointInTPtr transformed_PCl (new pcl::PointCloud<pcl::PointXYZRGB>);
-//      pcl::transformPointCloud (*grph[src].pScenePCl, *transformed_PCl, transformation);
-//      pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified2 (transformed_PCl);
-//      vis_temp2->addPointCloud<pcl::PointXYZRGB> (transformed_PCl, handler_rgb_verified2, "Hypothesis_2");
-//      vis_temp2->spin ();
+          pcl::visualization::PCLVisualizer::Ptr vis_temp2 (new pcl::visualization::PCLVisualizer);
+          pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified (grph[trgt].pScenePCl);
+          vis_temp2->addPointCloud<pcl::PointXYZRGB> (grph[trgt].pScenePCl, handler_rgb_verified, "Hypothesis_1");
+          PointInTPtr transformed_PCl (new pcl::PointCloud<pcl::PointXYZRGB>);
+          pcl::transformPointCloud (*grph[src].pScenePCl, *transformed_PCl, grph[edge].transformation);
+          pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified2 (transformed_PCl);
+          vis_temp2->addPointCloud<pcl::PointXYZRGB> (transformed_PCl, handler_rgb_verified2, "Hypothesis_2");
+          vis_temp2->spin ();
 }
 
-void multiviewGraph::
-selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edges, const Graph &grph, std::vector<Edge> &single_edges )
+//void multiviewGraph::
+//selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edges, const Graph &grph, std::vector<Edge> &single_edges )
+//{
+//    for ( size_t edgeVec_id = 0; edgeVec_id < parallel_edges.size (); edgeVec_id++ )
+//    {
+//        Vertex vrtx_src, vrtx_trgt;
+//        vrtx_src = source ( parallel_edges[edgeVec_id], grph );
+//        vrtx_trgt = target ( parallel_edges[edgeVec_id], grph );
+
+//        bool found = false;
+//        for ( size_t edges_lowestWeight_id = 0; edges_lowestWeight_id < single_edges.size (); edges_lowestWeight_id++ ) //select edge with lowest weight amongst parallel edges
+//        {
+
+//            //check if edge already exists in final graph between these two vertices
+//            if ( ( ( ( boost::get ( vertex_index, grph, source ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_src ) )
+//                     && ( boost::get ( vertex_index, grph, target ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_trgt ) ) )
+//                   || ( ( boost::get ( vertex_index, grph, source ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_trgt ) )
+//                        && ( boost::get ( vertex_index, grph, target ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_src ) ) ) ) )
+//            {
+//                found = true;
+//                if ( grph[parallel_edges[edgeVec_id]].edge_weight < grph[single_edges[edges_lowestWeight_id]].edge_weight ) //check for lowest edge cost - if lower than currently lowest weight, then replace
+//                {
+//                    single_edges[edges_lowestWeight_id] = parallel_edges[edgeVec_id];
+//                }
+//                break;
+//            }
+//        }
+//        if ( !found )
+//            single_edges.push_back ( parallel_edges[edgeVec_id] );
+//    }
+//}
+
+Vertex multiviewGraph::getFurthestVertex ( Graph &grph)
 {
-    for ( size_t edgeVec_id = 0; edgeVec_id < parallel_edges.size (); edgeVec_id++ )
+    std::pair<vertex_iter, vertex_iter> vp; //vp.first = running iterator..... vp.second = last iterator
+
+    vp = vertices ( grph );
+    Vertex furthest_vrtx = *vp.first;
+    ++vp.first;
+
+    for (; vp.first != vp.second; ++vp.first )
     {
-        Vertex vrtx_src, vrtx_trgt;
-        vrtx_src = source ( parallel_edges[edgeVec_id], grph );
-        vrtx_trgt = target ( parallel_edges[edgeVec_id], grph );
-
-        bool found = false;
-        for ( size_t edges_lowestWeight_id = 0; edges_lowestWeight_id < single_edges.size (); edges_lowestWeight_id++ ) //select edge with lowest weight amongst parallel edges
+        if(grph[*vp.first].cumulative_weight_to_new_vrtx_ > grph[furthest_vrtx].cumulative_weight_to_new_vrtx_)
         {
-
-            //check if edge already exists in final graph between these two vertices
-            if ( ( ( ( boost::get ( vertex_index, grph, source ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_src ) )
-                     && ( boost::get ( vertex_index, grph, target ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_trgt ) ) )
-                    || ( ( boost::get ( vertex_index, grph, source ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_trgt ) )
-                         && ( boost::get ( vertex_index, grph, target ( single_edges[edges_lowestWeight_id], grph ) ) == boost::get ( vertex_index, grph, vrtx_src ) ) ) ) )
-            {
-                found = true;
-                if ( grph[parallel_edges[edgeVec_id]].edge_weight < grph[single_edges[edges_lowestWeight_id]].edge_weight ) //check for lowest edge cost - if lower than currently lowest weight, then replace
-                {
-                    single_edges[edges_lowestWeight_id] = parallel_edges[edgeVec_id];
-                }
-                break;
-            }
+            furthest_vrtx = *vp.first;
         }
-        if ( !found )
-            single_edges.push_back ( parallel_edges[edgeVec_id] );
     }
+
+    return furthest_vrtx;
 }
+
+std::vector<Hypothesis> multiviewGraph::
+extendHypothesisRecursive ( Graph &grph, Edge calling_out_edge) //is directed edge (so the source of calling_edge is calling vertex)
+{
+    std::vector<Hypothesis> hyp_vec;
+
+    typename graph_traits<Graph>::out_edge_iterator out_i, out_end;
+    Vertex current_vertex = target ( calling_out_edge, grph );
+    Vertex src = source ( calling_out_edge, grph );
+
+    grph[current_vertex].has_been_hopped_ = true;
+    grph[current_vertex].cumulative_weight_to_new_vrtx_ = grph[src].cumulative_weight_to_new_vrtx_ + grph[calling_out_edge].edge_weight;
+
+    ROS_INFO("Current Vertex %s has a cumulative weight of %lf.", grph[current_vertex].scene_filename_.c_str(), grph[current_vertex].cumulative_weight_to_new_vrtx_);
+    for ( tie ( out_i, out_end ) = out_edges ( current_vertex, grph ); out_i != out_end; ++out_i )
+    {
+        Vertex targ = target ( *out_i, grph );
+
+        if ( grph[targ].has_been_hopped_ )
+        {
+            ROS_INFO("Vertex %s has already been hopped.", grph[targ].scene_filename_.c_str());
+            continue;
+        }
+        ROS_INFO("Hopping to vertex %s...", grph[targ].scene_filename_.c_str());
+        std::vector<Hypothesis> new_hypotheses = extendHypothesisRecursive ( grph, *out_i);
+        for(std::vector<Hypothesis>::iterator it_new_hyp = new_hypotheses.begin(); it_new_hyp !=new_hypotheses.end(); ++it_new_hyp)
+        {
+            if ( grph[calling_out_edge].target_id.compare( grph[current_vertex].scene_filename_ ) == 0)
+            {
+                it_new_hyp->transform_ = grph[calling_out_edge].transformation.inverse () * it_new_hyp->transform_ ;
+            }
+            else if (grph[calling_out_edge].source_id.compare( grph[current_vertex].scene_filename_ ) == 0)
+            {
+                it_new_hyp->transform_ = grph[calling_out_edge].transformation * it_new_hyp->transform_;
+            }
+            else
+            {
+                ROS_WARN("Something is messed up with the transformation.");
+            }
+            hyp_vec.push_back(*it_new_hyp);
+        }
+    }
+
+    for ( std::vector<Hypothesis>::const_iterator it_hyp = grph[current_vertex].hypothesis.begin (); it_hyp != grph[current_vertex].hypothesis.end (); ++it_hyp )
+    {
+        if(!it_hyp->verified_)
+            continue;
+
+        Eigen::Matrix4f tf;
+        if ( grph[calling_out_edge].source_id.compare( grph[src].scene_filename_ ) == 0)
+        {
+            tf = grph[calling_out_edge].transformation.inverse () * it_hyp->transform_;
+        }
+        else if (grph[calling_out_edge].target_id.compare( grph[src].scene_filename_ ) == 0)
+        {
+            tf = grph[calling_out_edge].transformation * it_hyp->transform_;
+        }
+        else
+        {
+            ROS_WARN("Something is messed up with the transformation.");
+        }
+        Hypothesis ht_temp ( it_hyp->model_id_, tf, it_hyp->origin_, true );
+        hyp_vec.push_back(ht_temp);
+    }
+
+    return hyp_vec;
+}
+
 
 void multiviewGraph::
 extendHypothesis ( Graph &grph )
@@ -630,15 +717,14 @@ extendHypothesis ( Graph &grph )
         something_has_been_updated = false;
         for ( vp = vertices ( grph ); vp.first != vp.second; ++vp.first )
         {
-
             typename graph_traits<Graph>::out_edge_iterator out_i, out_end;
             for ( tie ( out_i, out_end ) = out_edges ( *vp.first, grph ); out_i != out_end; ++out_i )
             {
                 Edge e = *out_i;
                 Vertex src = source ( e, grph ), targ = target ( e, grph );
 
-                if ( boost::get ( vertex_index, grph, src ) != boost::get ( vertex_index, grph, *vp.first ) )
-                    std::cout << "something's wrong" << std::endl;
+                if ( grph[src].scene_filename_ != grph[*vp.first].scene_filename_ )
+                    PCL_WARN("something's wrong");
 
                 size_t hypothesis_length_before_extension = grph[src].hypothesis.size ();
 
@@ -657,7 +743,7 @@ extendHypothesis ( Graph &grph )
                     if ( !hypotheses_from_view_exist )
                     {
                         Eigen::Matrix4f tf;
-                        if ( grph[e].source_id == boost::get ( vertex_index, grph, *vp.first ) )
+                        if ( grph[e].source_id.compare( grph[*vp.first].scene_filename_ ) == 0 )
                         {
                             tf = grph[e].transformation.inverse () * it_hypB->transform_;
                         }
@@ -676,94 +762,97 @@ extendHypothesis ( Graph &grph )
     }
 }
 
+//void multiviewGraph::
+//calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &edges_final )
+//{
+//    GraphMST grphMST;
+//    std::vector<VertexMST> verticesMST_v;
+//    std::vector<Edge> edges_lowestWeight;
+
+//    for ( std::pair<vertex_iter, vertex_iter> vp = vertices ( grph ); vp.first != vp.second; ++vp.first )
+//    {
+//        VertexMST vrtxMST = boost::add_vertex ( grphMST );
+//        verticesMST_v.push_back ( vrtxMST );
+//    }
+
+//    selectLowestWeightEdgesFromParallelEdges ( edges, grph, edges_lowestWeight );
+
+//    //---create-input-for-Minimum-Spanning-Tree-calculation-------------------------------
+//    for ( size_t edgeVec_id = 0; edgeVec_id < edges_lowestWeight.size (); edgeVec_id++ )
+//    {
+//        Vertex vrtx_src, vrtx_trgt;
+//        vrtx_src = source ( edges_lowestWeight[edgeVec_id], grph );
+//        vrtx_trgt = target ( edges_lowestWeight[edgeVec_id], grph );
+//        add_edge ( verticesMST_v[get ( vertex_index, grph, vrtx_src )], verticesMST_v[get ( vertex_index, grph, vrtx_trgt )],
+//                grph[edges_lowestWeight[edgeVec_id]].edge_weight, grphMST );
+//    }
+
+//#if defined(BOOST_MSVC) && BOOST_MSVC <= 1300
+//    std::cout << "Boost Version not supported (you are using BOOST_MSVC Version: " << BOOST_MSVC << ", BOOST_MSVC > 1300 needed)" << std::endl;
+//#else
+//    std::vector < graph_traits<GraphMST>::vertex_descriptor > p ( num_vertices ( grphMST ) );
+//    prim_minimum_spanning_tree ( grphMST, &p[0] );
+
+//    dynamic_properties dp;
+//    dp.property ( "node_id", get ( vertex_index, grphMST ) );
+//    dp.property ( "weight", get ( edge_weight, grphMST ) );
+//    std::cout << "Result Prims Algorithm: \n======================" << std::endl;
+//    write_graphviz_dp ( std::cout, grphMST, dp, "node_id" );
+//    std::cout << " There are " << boost::num_edges ( grphMST ) << " edges in the graph grph." << std::endl;
+
+//#endif
+
+//    for ( std::size_t i = 0; i != p.size (); ++i )
+//    {
+//        if ( p[i] != i )
+//            std::cout << "parent[" << i << "] = " << p[i] << std::endl;
+//        else
+//            std::cout << "parent[" << i << "] = no parent" << std::endl;
+//    }
+
+//    for ( size_t edgeVec_id = 0; edgeVec_id < edges_lowestWeight.size (); edgeVec_id++ )
+//    {
+//        Vertex vrtx_src, vrtx_trgt;
+//        vrtx_src = source ( edges_lowestWeight[edgeVec_id], grph );
+//        vrtx_trgt = target ( edges_lowestWeight[edgeVec_id], grph );
+//        if ( p[boost::get ( vertex_index, grph, vrtx_src )] == boost::get ( vertex_index, grph, vrtx_trgt ) || p[boost::get ( vertex_index, grph, vrtx_trgt )]
+//             == boost::get ( vertex_index, grph, vrtx_src ) ) //check if edge represents an edge of Prim's Minimum Spanning Tree
+//        {
+//            edges_final.push_back ( edges_lowestWeight[edgeVec_id] );
+//        }
+//    }
+//}
+
 void multiviewGraph::
-calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &edges_final )
+createEdgesFromHypothesisMatch (Graph &grph, std::vector<Edge> &edges )
 {
-    GraphMST grphMST;
-    std::vector<VertexMST> verticesMST_v;
-    std::vector<Edge> edges_lowestWeight;
-
-    for ( std::pair<vertex_iter, vertex_iter> vp = vertices ( grph ); vp.first != vp.second; ++vp.first )
+    vertex_iter vertexItA, vertexEndA;
+    for (boost::tie(vertexItA, vertexEndA) = vertices(grph_); vertexItA != vertexEndA; ++vertexItA)
     {
-        VertexMST vrtxMST = boost::add_vertex ( grphMST );
-        verticesMST_v.push_back ( vrtxMST );
-    }
-
-    selectLowestWeightEdgesFromParallelEdges ( edges, grph, edges_lowestWeight );
-
-    //---create-input-for-Minimum-Spanning-Tree-calculation-------------------------------
-    for ( size_t edgeVec_id = 0; edgeVec_id < edges_lowestWeight.size (); edgeVec_id++ )
-    {
-        Vertex vrtx_src, vrtx_trgt;
-        vrtx_src = source ( edges_lowestWeight[edgeVec_id], grph );
-        vrtx_trgt = target ( edges_lowestWeight[edgeVec_id], grph );
-        add_edge ( verticesMST_v[get ( vertex_index, grph, vrtx_src )], verticesMST_v[get ( vertex_index, grph, vrtx_trgt )],
-                   grph[edges_lowestWeight[edgeVec_id]].edge_weight, grphMST );
-    }
-
-#if defined(BOOST_MSVC) && BOOST_MSVC <= 1300
-    std::cout << "Boost Version not supported (you are using BOOST_MSVC Version: " << BOOST_MSVC << ", BOOST_MSVC > 1300 needed)" << std::endl;
-#else
-    std::vector < graph_traits<GraphMST>::vertex_descriptor > p ( num_vertices ( grphMST ) );
-    prim_minimum_spanning_tree ( grphMST, &p[0] );
-
-    dynamic_properties dp;
-    dp.property ( "node_id", get ( vertex_index, grphMST ) );
-    dp.property ( "weight", get ( edge_weight, grphMST ) );
-    std::cout << "Result Prims Algorithm: \n======================" << std::endl;
-    write_graphviz_dp ( std::cout, grphMST, dp, "node_id" );
-    std::cout << " There are " << boost::num_edges ( grphMST ) << " edges in the graph grph." << std::endl;
-
-#endif
-
-    for ( std::size_t i = 0; i != p.size (); ++i )
-    {
-        if ( p[i] != i )
-            std::cout << "parent[" << i << "] = " << p[i] << std::endl;
-        else
-            std::cout << "parent[" << i << "] = no parent" << std::endl;
-    }
-
-    for ( size_t edgeVec_id = 0; edgeVec_id < edges_lowestWeight.size (); edgeVec_id++ )
-    {
-        Vertex vrtx_src, vrtx_trgt;
-        vrtx_src = source ( edges_lowestWeight[edgeVec_id], grph );
-        vrtx_trgt = target ( edges_lowestWeight[edgeVec_id], grph );
-        if ( p[boost::get ( vertex_index, grph, vrtx_src )] == boost::get ( vertex_index, grph, vrtx_trgt ) || p[boost::get ( vertex_index, grph, vrtx_trgt )]
-                == boost::get ( vertex_index, grph, vrtx_src ) ) //check if edge represents an edge of Prim's Minimum Spanning Tree
+        for ( size_t hypVec_id = 0; hypVec_id < grph[*vertexItA].hypothesis.size (); hypVec_id++ )
         {
-            edges_final.push_back ( edges_lowestWeight[edgeVec_id] );
-        }
-    }
-}
-
-void multiviewGraph::
-createEdgesFromHypothesisMatch ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges )
-{
-    for ( std::vector<Vertex>::const_iterator it_vrtxA = vertices_v.begin (); it_vrtxA != vertices_v.end (); ++it_vrtxA )
-    {
-        for ( size_t hypVec_id = 0; hypVec_id < grph[*it_vrtxA].hypothesis.size (); hypVec_id++ )
-        {
-            for ( std::vector<Vertex>::const_iterator it_vrtxB = vertices_v.begin (); it_vrtxB != it_vrtxA; ++it_vrtxB )
+            vertex_iter vertexItB, vertexEndB;
+            for (boost::tie(vertexItB, vertexEndB) = vertices(grph_); vertexItB != vertexItA; ++vertexItB)
             {
-                for ( std::vector<Hypothesis>::iterator it_hypB = grph[*it_vrtxB].hypothesis.begin (); it_hypB != grph[*it_vrtxB].hypothesis.end (); ++it_hypB )
+                //was for ( std::vector<Vertex>::const_iterator it_vrtxB = vertices_v.begin (); it_vrtxB != it_vrtxA; ++it_vrtxB )
+                for ( std::vector<Hypothesis>::iterator it_hypB = grph[*vertexItB].hypothesis.begin (); it_hypB != grph[*vertexItB].hypothesis.end (); ++it_hypB )
                 {
-                    if ( it_hypB->model_id_.compare ( grph[*it_vrtxA].hypothesis[hypVec_id].model_id_ ) == 0 ) //model exists in other file -> create connection
+                    if ( it_hypB->model_id_.compare ( grph[*vertexItA].hypothesis[hypVec_id].model_id_ ) == 0 ) //model exists in other file -> create connection
                     {
-                        Eigen::Matrix4f tf_temp = it_hypB->transform_ * grph[*it_vrtxA].hypothesis[hypVec_id].transform_.inverse (); //might be the other way around
+                        Eigen::Matrix4f tf_temp = it_hypB->transform_ * grph[*vertexItA].hypothesis[hypVec_id].transform_.inverse (); //might be the other way around
 
                         //link views by an edge (for other graph)
                         Edge e_cpy;
                         bool b;
-                        tie ( e_cpy, b ) = add_edge ( *it_vrtxA, *it_vrtxB, grph );
+                        tie ( e_cpy, b ) = add_edge ( *vertexItA, *vertexItB, grph );
                         grph[e_cpy].transformation = tf_temp;
-                        grph[e_cpy].model_name = grph[*it_vrtxA].hypothesis[hypVec_id].model_id_;
-                        grph[e_cpy].source_id = boost::get ( vertex_index, grph, *it_vrtxA );
-                        grph[e_cpy].target_id = boost::get ( vertex_index, grph, *it_vrtxB );
+                        grph[e_cpy].model_name = grph[*vertexItA].hypothesis[hypVec_id].model_id_;
+                        grph[e_cpy].source_id = grph[*vertexItA].scene_filename_;
+                        grph[e_cpy].target_id = grph[*vertexItB].scene_filename_;
                         grph[e_cpy].edge_weight = std::numeric_limits<double>::max ();
                         edges.push_back ( e_cpy );
 
-                        std::cout << "Creating Edge from " << boost::get ( vertex_index, grph, *it_vrtxA ) << " to " << boost::get ( vertex_index, grph, *it_vrtxB )
+                        std::cout << "Creating Edge from " << grph[*vertexItA].scene_filename_ << " to " << grph[*vertexItB].scene_filename_
                                   << std::endl;
                     }
                 }
@@ -773,31 +862,51 @@ createEdgesFromHypothesisMatch ( const std::vector<Vertex> &vertices_v, Graph &g
 }
 
 void multiviewGraph::
-createEdgesFromHypothesisMatchOnline ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges )
+createEdgesFromHypothesisMatchOnline ( const Vertex new_vertex, Graph &grph, std::vector<Edge> &edges )
 {
-    for ( std::vector<Vertex>::const_iterator it_vrtxA = vertices_v.begin (); it_vrtxA != vertices_v.end () - 1; ++it_vrtxA )
+    ROS_INFO("There are %ld vertices to check.", num_vertices(grph));
+    vertex_iter vertexItA, vertexEndA;
+    for (boost::tie(vertexItA, vertexEndA) = vertices(grph_); vertexItA != vertexEndA; ++vertexItA)
     {
-        for ( size_t hypVec_id = 0; hypVec_id < grph[*it_vrtxA].hypothesis.size (); hypVec_id++ )
+        if ( grph[*vertexItA].scene_filename_.compare( grph[new_vertex].scene_filename_ ) == 0 )
         {
-            for ( std::vector<Hypothesis>::iterator it_hypB = grph[vertices_v.back()].hypothesis.begin (); it_hypB != grph[vertices_v.back()].hypothesis.end (); ++it_hypB )
+            continue;
+        }
+
+        ROS_INFO("Checking vertex %s, which has %ld hypotheses.", grph[*vertexItA].scene_filename_.c_str(), grph[*vertexItA].hypothesis.size());
+        //for ( size_t hypVec_id = 0; hypVec_id < grph[*it_vrtxA].hypothesis.size (); hypVec_id++ )
+        for ( std::vector<Hypothesis>::iterator it_hypA = grph[*vertexItA].hypothesis.begin (); it_hypA != grph[*vertexItA].hypothesis.end (); ++it_hypA )
+        {
+            for ( std::vector<Hypothesis>::iterator it_hypB = grph[new_vertex].hypothesis.begin (); it_hypB != grph[new_vertex].hypothesis.end (); ++it_hypB )
             {
-                if ( it_hypB->model_id_.compare ( grph[*it_vrtxA].hypothesis[hypVec_id].model_id_ ) == 0 ) //model exists in other file (same id) -> create connection
+                if ( it_hypB->model_id_.compare (it_hypA->model_id_ ) == 0 ) //model exists in other file (same id) --> create connection
                 {
-                    Eigen::Matrix4f tf_temp = it_hypB->transform_ * grph[*it_vrtxA].hypothesis[hypVec_id].transform_.inverse (); //might be the other way around
+                    Eigen::Matrix4f tf_temp = it_hypB->transform_ * it_hypA->transform_.inverse (); //might be the other way around
 
                     //link views by an edge (for other graph)
                     Edge e_cpy;
                     bool b;
-                    tie ( e_cpy, b ) = add_edge ( *it_vrtxA, vertices_v.back(), grph );
+                    tie ( e_cpy, b ) = add_edge ( *vertexItA, new_vertex, grph );
                     grph[e_cpy].transformation = tf_temp;
-                    grph[e_cpy].model_name = grph[*it_vrtxA].hypothesis[hypVec_id].model_id_;
-                    grph[e_cpy].source_id = boost::get ( vertex_index, grph, *it_vrtxA );
-                    grph[e_cpy].target_id = boost::get ( vertex_index, grph, vertices_v.back() );
+                    grph[e_cpy].model_name = it_hypA->model_id_;
+                    grph[e_cpy].source_id = grph[*vertexItA].scene_filename_;
+                    grph[e_cpy].target_id = grph[new_vertex].scene_filename_;
                     grph[e_cpy].edge_weight = std::numeric_limits<double>::max ();
                     edges.push_back ( e_cpy );
 
-                    std::cout << "Creating edge from " << boost::get ( vertex_index, grph, *it_vrtxA ) << " to " << boost::get ( vertex_index, grph, vertices_v.back() )
+                    std::cout << "Creating edge from " << grph[*vertexItA].scene_filename_ << " to " << grph[new_vertex].scene_filename_
+                              << " for model match " << grph[e_cpy].model_name
                               << std::endl;
+                    pcl::visualization::PCLVisualizer::Ptr vis_temp (new pcl::visualization::PCLVisualizer);
+                    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified (grph[new_vertex].pScenePCl);
+                    vis_temp->addPointCloud<pcl::PointXYZRGB> (grph[new_vertex].pScenePCl, handler_rgb_verified, "VrtxA");
+
+                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr pAlignedPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
+                    pcl::transformPointCloud (*grph[*vertexItA].pScenePCl, *pAlignedPCl, tf_temp);
+                    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified2 (pAlignedPCl);
+                    vis_temp->addPointCloud<pcl::PointXYZRGB> (pAlignedPCl, handler_rgb_verified2, "pAlignedPCl");
+
+                    vis_temp->spin();
                 }
             }
         }
@@ -809,13 +918,15 @@ View::View ()
     pScenePCl.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
     //pScenePCl_f.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
     pSceneNormals.reset ( new pcl::PointCloud<pcl::Normal> );
-//    pSceneXYZRGBNormal.reset ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
+    //    pSceneXYZRGBNormal.reset ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
     //pScenePCl_f_ds.reset ( new pcl::PointCloud<pcl::PointXYZRGB> );
     pIndices_above_plane.reset ( new pcl::PointIndices );
     pSignatures.reset ( new pcl::PointCloud<FeatureT> );
+    has_been_hopped_ = false;
+    cumulative_weight_to_new_vrtx_ = 0;
 }
 
-Hypothesis::Hypothesis ( std::string model_id, Eigen::Matrix4f transform, std::string origin, bool extended, bool verified )
+Hypothesis::Hypothesis ( const std::string model_id, const Eigen::Matrix4f transform, const std::string origin, const bool extended, const bool verified )
 {
     model_id_ = model_id;
     transform_ = transform;
@@ -824,40 +935,52 @@ Hypothesis::Hypothesis ( std::string model_id, Eigen::Matrix4f transform, std::s
     verified_ = verified;
 }
 
+myEdge::myEdge()
+{
+    edge_weight = std::numeric_limits<float>::max ();
+    model_name = "";
+    source_id = "";
+    target_id = "";
+    edge_weight_has_been_calculated_ = false;
+    std::vector <cv::DMatch> matches;
+}
+
 void multiviewGraph::
-calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
+calcEdgeWeight ( Graph &grph)
 {
     //----calculate-edge-weight---------------------------------------------------------
     //pcl::visualization::PCLVisualizer::Ptr vis_temp ( new pcl::visualization::PCLVisualizer );
     //std::vector<int> viewportNr_temp = visualization_framework ( vis_temp, 2, 1 );
-    for ( size_t edge_id = 0; edge_id < edges.size (); edge_id++ ) //std::vector<Edge>::iterator edge_it = edges.begin(); edge_it!=edges.end(); ++edge_it)
+    std::pair<edge_iter, edge_iter> ep = edges(grph);
+    for (; ep.first!=ep.second; ++ep.first) //std::vector<Edge>::iterator edge_it = edges.begin(); edge_it!=edges.end(); ++edge_it)
     {
-
-//        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pTargetNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
-//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
-//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
-//        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSourceNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
+        if(grph[*ep.first].edge_weight_has_been_calculated_)
+            continue;
+        //        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pTargetNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
+        //        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSourceNormalPCl ( new pcl::PointCloud<pcl::PointXYZRGBNormal> );
 
 
         double edge_weight;
         Vertex vrtx_src, vrtx_trgt;
-        vrtx_src = source ( edges[edge_id], grph );
-        vrtx_trgt = target ( edges[edge_id], grph );
+        vrtx_src = source ( *ep.first, grph );
+        vrtx_trgt = target ( *ep.first, grph );
 
         Eigen::Matrix4f transform;
-        if ( grph[edges[edge_id]].source_id == boost::get ( vertex_index, grph, vrtx_src ) )
+        if ( grph[*ep.first].source_id.compare( grph[vrtx_src].scene_filename_ ))
         {
-            transform = grph[edges[edge_id]].transformation;
+            transform = grph[*ep.first].transformation;
         }
         else
         {
-            transform = grph[edges[edge_id]].transformation.inverse ();
+            transform = grph[*ep.first].transformation.inverse ();
         }
 
         float w_after_icp_ = std::numeric_limits<float>::max ();
 
-//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
-//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pTargetPCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pSourcePCl_ficp ( new pcl::PointCloud<pcl::PointXYZRGB> );
 
         float best_overlap_ = 0.75f;
         Eigen::Matrix4f icp_trans;
@@ -881,16 +1004,16 @@ calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
             w_after_icp_ = best_overlap_ - w_after_icp_;
         }
 
-//        pcl::transformPointCloudWithNormals ( * ( grph[vrtx_src].pSceneXYZRGBNormal ), *pTargetNormalPCl, icp_trans );
-//        pcl::copyPointCloud ( * ( grph[vrtx_trgt].pSceneXYZRGBNormal ), *pSourceNormalPCl );
+        //        pcl::transformPointCloudWithNormals ( * ( grph[vrtx_src].pSceneXYZRGBNormal ), *pTargetNormalPCl, icp_trans );
+        //        pcl::copyPointCloud ( * ( grph[vrtx_trgt].pSceneXYZRGBNormal ), *pSourceNormalPCl );
 
-        if ( grph[edges[edge_id]].source_id == boost::get ( vertex_index, grph, vrtx_src ) )
+        if ( grph[*ep.first].source_id.compare( grph[vrtx_src].scene_filename_ ))
         {
             PCL_WARN ( "Normal...\n" );
             //icp trans is aligning source to target
             //transform is aligning source to target
             //grph[edges[edge_id]].transformation = icp_trans * grph[edges[edge_id]].transformation;
-            grph[edges[edge_id]].transformation = icp_trans;
+            grph[*ep.first].transformation = icp_trans;
         }
         else
         {
@@ -898,14 +1021,18 @@ calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
             //icp trans is aligning source to target
             PCL_WARN ( "Inverse...\n" );
             //grph[edges[edge_id]].transformation = icp_trans.inverse() * grph[edges[edge_id]].transformation;
-            grph[edges[edge_id]].transformation = icp_trans.inverse ();
+            grph[*ep.first].transformation = icp_trans.inverse ();
         }
 
         edge_weight = w_after_icp_;
 
 
-        std::cout << "WEIGHT IS: " << edge_weight << " coming from edge with object_id: " << grph[edges[edge_id]].model_name << std::endl;
-        grph[edges[edge_id]].edge_weight = edge_weight;
+        std::cout << "WEIGHT IS: " << edge_weight << " coming from edge connecting " << grph[*ep.first].source_id
+                  << " and " << grph[*ep.first].target_id << " by object_id: " << grph[*ep.first].model_name
+                  << std::endl;
+
+        grph[*ep.first].edge_weight = edge_weight;
+        grph[*ep.first].edge_weight_has_been_calculated_ = true;
 
         /*vis_temp->removeAllPointClouds();
          pcl::visualization::PointCloudColorHandlerRGBField < pcl::PointXYZRGBNormal > handler_rgb_verified (pSourceNormalPCl);
@@ -920,298 +1047,6 @@ calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph)
          }
          vis_temp->spin();*/
     }
-}
-
-double multiviewGraph::
-calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,
-                       pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr pOctree, int K, double beta )
-{
-    //calculates the discrepancy between the inputPCl and the ScenePCL by K nearest neighbor search.
-    //.........................
-
-    double overlap = 0;
-    double pt2ptDistSUM = 0;
-    double dot_prodSUM = 0;
-    double color_regSUM = 0;
-    int n_points_used = 0;
-
-    std::vector<int> scene_points_indices;
-
-    for ( size_t ptId = 0; ptId < pInputNormalPCl->points.size (); ++ptId )
-    {
-        std::vector<int> pointIdxNKNSearch;
-        std::vector<float> pointNKNSquaredDistance;
-
-        pcl::PointXYZRGB searchPoint;
-        if ( ! ( isnan ( pInputNormalPCl->points[ptId].normal_x ) || isnan ( pInputNormalPCl->points[ptId].normal_y )
-                 || isnan ( pInputNormalPCl->points[ptId].normal_z ) ) )
-        {
-            searchPoint.getVector4fMap () = pInputNormalPCl->points[ptId].getVector4fMap ();
-
-            if ( pOctree->nearestKSearch ( searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance ) > 0 )
-            {
-
-                for ( size_t idKnn = 0; idKnn < pointIdxNKNSearch.size (); ++idKnn )
-                {
-
-                    if ( ! ( isnan ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].normal_x )
-                             || isnan ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].normal_y )
-                             || isnan ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].normal_z ) ) )
-                    {
-                        float rgb_m, rgb_s;
-                        rgb_m = pInputNormalPCl->points[ptId].rgb;
-                        rgb_s = pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].rgb;
-                        uint32_t rgb = *reinterpret_cast<int*> ( &rgb_m );
-                        uint8_t rm = ( rgb >> 16 ) & 0x0000ff;
-                        uint8_t gm = ( rgb >> 8 ) & 0x0000ff;
-                        uint8_t bm = ( rgb ) & 0x0000ff;
-
-                        rgb = *reinterpret_cast<int*> ( &rgb_s );
-                        uint8_t rs = ( rgb >> 16 ) & 0x0000ff;
-                        uint8_t gs = ( rgb >> 8 ) & 0x0000ff;
-                        uint8_t bs = ( rgb ) & 0x0000ff;
-
-                        float ym = 0.257f * rm + 0.504f * gm + 0.098f * bm + 16; //between 16 and 235
-                        float um = - ( 0.148f * rm ) - ( 0.291f * gm ) + ( 0.439f * bm ) + 128;
-                        float vm = ( 0.439f * rm ) - ( 0.368f * gm ) - ( 0.071f * bm ) + 128;
-
-                        float ys = 0.257f * rs + 0.504f * gs + 0.098f * bs + 16; //between 16 and 235
-                        float us = - ( 0.148f * rs ) - ( 0.291f * gs ) + ( 0.439f * bs ) + 128;
-                        float vs = ( 0.439f * rs ) - ( 0.368f * gs ) - ( 0.071f * bs ) + 128;
-                        float color_sigma = 35.f;
-                        color_sigma *= color_sigma;
-                        float color_reg = std::exp ( ( -0.5f * ( um - us ) * ( um - us ) ) / ( color_sigma ) ) * std::exp ( ( -0.5f * ( vm - vs ) * ( vm - vs ) ) / ( color_sigma ) );
-
-                        float pt2ptDist = sqrt ( pointNKNSquaredDistance[idKnn] );
-                        float dot_prod =
-                            pInputNormalPCl->points[ptId].getNormalVector3fMap ().dot ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].getNormalVector3fMap () ); // vectors_dot_prod(pModelPCl_aligned_icp_wNormal->points[ptId].normal, .normal, 3);
-                        //scene_points_indices.push_back(pointIdxNKNSearch[idKnn]);
-
-                        double thresholdPt2PtDist = 0.01;
-                        if ( pt2ptDist > thresholdPt2PtDist )
-                        {
-                            pt2ptDist = thresholdPt2PtDist;
-                            continue;
-                            //insert Threshold
-                        }
-
-                        overlap += /*pt2ptDist/thresholdPt2PtDist +*/beta * ( 1.f - dot_prod ) + ( 1.f - color_reg );
-                        pt2ptDistSUM += pt2ptDist / thresholdPt2PtDist;
-                        dot_prodSUM += beta * ( 1.f - dot_prod );
-                        color_regSUM += ( 1.f - color_reg );
-                        n_points_used++;
-                    }
-                }
-            }
-        }
-    }
-
-    //std::sort(scene_points_indices.begin(),scene_points_indices.end());
-    //scene_points_indices.erase( std::unique( scene_points_indices.begin(), scene_points_indices.end() ), scene_points_indices.end() );
-    //pcl::copyPointCloud(*grph[*it_vrtx].pScenePCl, scene_points_indices, pScenePCl_knn);
-
-    if ( n_points_used < 10 )
-    {
-        std::cout << "Not enough corresponding points (n = " << n_points_used << ")... Edge will be discarded. " << std::endl;
-        return std::numeric_limits<double>::max ();
-    }
-
-    std::cout << "N points used: " << n_points_used << ";  ptp2ptDist: " << pt2ptDistSUM / n_points_used << ";   dot_prod: " << dot_prodSUM
-              / n_points_used << ";   color: " << color_regSUM / n_points_used << std::endl;
-    return overlap / static_cast<float> ( n_points_used );
-}
-
-double multiviewGraph::
-calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,
-                       pcl::search::OrganizedNeighbor<pcl::PointXYZRGB>::Ptr pOrganizedNeighbor, int K, double beta )
-{
-    //calculates the discrepancy between the inputPCl and the ScenePCL by K nearest neighbor search.
-    //.........................
-
-    double overlap = 0;
-    double pt2ptDistSUM = 0;
-    double dot_prodSUM = 0;
-    double color_regSUM = 0;
-    int n_points_used = 0;
-
-    std::vector<int> scene_points_indices;
-    //#pragma omp parallel for
-    for ( size_t ptId = 0; ptId < pInputNormalPCl->points.size (); ++ptId )
-    {
-
-        if ( ! ( isnan ( pInputNormalPCl->points[ptId].x ) || isnan ( pInputNormalPCl->points[ptId].y ) || isnan ( pInputNormalPCl->points[ptId].z )
-                 || isnan ( pInputNormalPCl->points[ptId].normal_x ) || isnan ( pInputNormalPCl->points[ptId].normal_y )
-                 || isnan ( pInputNormalPCl->points[ptId].normal_z ) ) )
-        {
-            std::vector<int> pointIdxNKNSearch;
-            std::vector<float> pointNKNSquaredDistance;
-
-            pcl::PointXYZRGB searchPoint;
-            searchPoint.getVector4fMap () = pInputNormalPCl->points[ptId].getVector4fMap ();
-
-            if ( pOrganizedNeighbor->nearestKSearch ( searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance ) > 0 )
-            {
-
-                for ( size_t idKnn = 0; idKnn < pointIdxNKNSearch.size (); ++idKnn )
-                {
-
-                    if ( ! ( isnan ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].normal_x )
-                             || isnan ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].normal_y )
-                             || isnan ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].normal_z ) ) )
-                    {
-                        float rgb_m, rgb_s;
-                        rgb_m = pInputNormalPCl->points[ptId].rgb;
-                        rgb_s = pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].rgb;
-                        uint32_t rgb = *reinterpret_cast<int*> ( &rgb_m );
-                        uint8_t rm = ( rgb >> 16 ) & 0x0000ff;
-                        uint8_t gm = ( rgb >> 8 ) & 0x0000ff;
-                        uint8_t bm = ( rgb ) & 0x0000ff;
-
-                        rgb = *reinterpret_cast<int*> ( &rgb_s );
-                        uint8_t rs = ( rgb >> 16 ) & 0x0000ff;
-                        uint8_t gs = ( rgb >> 8 ) & 0x0000ff;
-                        uint8_t bs = ( rgb ) & 0x0000ff;
-
-                        float ym = 0.257f * rm + 0.504f * gm + 0.098f * bm + 16; //between 16 and 235
-                        float um = - ( 0.148f * rm ) - ( 0.291f * gm ) + ( 0.439f * bm ) + 128;
-                        float vm = ( 0.439f * rm ) - ( 0.368f * gm ) - ( 0.071f * bm ) + 128;
-
-                        float ys = 0.257f * rs + 0.504f * gs + 0.098f * bs + 16; //between 16 and 235
-                        float us = - ( 0.148f * rs ) - ( 0.291f * gs ) + ( 0.439f * bs ) + 128;
-                        float vs = ( 0.439f * rs ) - ( 0.368f * gs ) - ( 0.071f * bs ) + 128;
-                        float color_sigma = 35.f;
-                        color_sigma *= color_sigma;
-                        float color_reg = std::exp ( ( -0.5f * ( um - us ) * ( um - us ) ) / ( color_sigma ) ) * std::exp ( ( -0.5f * ( vm - vs ) * ( vm - vs ) ) / ( color_sigma ) );
-
-                        float pt2ptDist = sqrt ( pointNKNSquaredDistance[idKnn] );
-                        float dot_prod =
-                            pInputNormalPCl->points[ptId].getNormalVector3fMap ().dot ( pSceneNormalPCl->points[pointIdxNKNSearch[idKnn]].getNormalVector3fMap () ); // vectors_dot_prod(pModelPCl_aligned_icp_wNormal->points[ptId].normal, .normal, 3);
-                        //scene_points_indices.push_back(pointIdxNKNSearch[idKnn]);
-
-                        double thresholdPt2PtDist = 0.01;
-                        if ( pt2ptDist > thresholdPt2PtDist )
-                        {
-                            //insert Threshold
-                            continue;
-                            pt2ptDist = thresholdPt2PtDist;
-                        }
-
-                        overlap += pt2ptDist / thresholdPt2PtDist + beta * ( 1.f - dot_prod ) + ( 1.f - color_reg );
-                        pt2ptDistSUM += pt2ptDist / thresholdPt2PtDist;
-                        dot_prodSUM += beta * ( 1.f - dot_prod );
-                        color_regSUM += ( 1.f - color_reg );
-                        n_points_used++;
-                    }
-                }
-            }
-        }
-    }
-
-    //std::sort(scene_points_indices.begin(),scene_points_indices.end());
-    //scene_points_indices.erase( std::unique( scene_points_indices.begin(), scene_points_indices.end() ), scene_points_indices.end() );
-    //pcl::copyPointCloud(*grph[*it_vrtx].pScenePCl, scene_points_indices, pScenePCl_knn);
-
-    std::cout << "N points used: " << n_points_used << ";  ptp2ptDist: " << pt2ptDistSUM / n_points_used << ";   dot_prod: " << dot_prodSUM
-              / n_points_used << ";   color: " << color_regSUM / n_points_used << std::endl;
-    return overlap / static_cast<float> ( n_points_used );
-}
-
-double multiviewGraph::
-calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl,
-                       std::vector<int> & unused, double beta )
-{
-    //calculates the discrepancy between the inputPCl and the ScenePCL by K nearest neighbor search.
-    //.........................
-
-    double overlap = 0;
-    double pt2ptDistSUM = 0;
-    double dot_prodSUM = 0;
-    double color_regSUM = 0;
-    int n_points_used = 0;
-
-    std::vector<int> scene_points_indices;
-    //#pragma omp parallel for
-    for ( size_t ptId = 0; ptId < pInputNormalPCl->points.size (); ++ptId )
-    {
-
-        if ( ! ( isnan ( pInputNormalPCl->points[ptId].x ) || isnan ( pInputNormalPCl->points[ptId].y ) || isnan ( pInputNormalPCl->points[ptId].z )
-                 || isnan ( pInputNormalPCl->points[ptId].normal_x ) || isnan ( pInputNormalPCl->points[ptId].normal_y )
-                 || isnan ( pInputNormalPCl->points[ptId].normal_z ) ) )
-        {
-            int u, v;
-            float fl = 525.f;
-            float cx, cy;
-            cx = 320.f;
-            cy = 240.f;
-            u = fl * ( pInputNormalPCl->points[ptId].x / pInputNormalPCl->points[ptId].z ) + cx;
-            v = fl * ( pInputNormalPCl->points[ptId].y / pInputNormalPCl->points[ptId].z ) + cy;
-
-            if ( u >= pSceneNormalPCl->width || v >= pSceneNormalPCl->height || u < 0 || v < 0 )
-            {
-                unused.push_back ( static_cast<int> ( ptId ) );
-                continue;
-            }
-
-            pcl::PointXYZRGBNormal pt = pSceneNormalPCl->at ( u, v );
-
-            if ( ! ( isnan ( pt.x ) || isnan ( pt.y ) || isnan ( pt.z ) || isnan ( pt.normal_x ) || isnan ( pt.normal_y ) || isnan ( pt.normal_z ) ) )
-            {
-                float pt2ptDist = ( pt.getVector3fMap () - pInputNormalPCl->points[ptId].getVector3fMap () ).norm ();
-                float dot_prod = pInputNormalPCl->points[ptId].getNormalVector3fMap ().dot ( pt.getNormalVector3fMap () );
-                float rgb_m, rgb_s;
-                rgb_m = pInputNormalPCl->points[ptId].rgb;
-                rgb_s = pt.rgb;
-                uint32_t rgb = *reinterpret_cast<int*> ( &rgb_m );
-                uint8_t rm = ( rgb >> 16 ) & 0x0000ff;
-                uint8_t gm = ( rgb >> 8 ) & 0x0000ff;
-                uint8_t bm = ( rgb ) & 0x0000ff;
-
-                rgb = *reinterpret_cast<int*> ( &rgb_s );
-                uint8_t rs = ( rgb >> 16 ) & 0x0000ff;
-                uint8_t gs = ( rgb >> 8 ) & 0x0000ff;
-                uint8_t bs = ( rgb ) & 0x0000ff;
-
-                float ym = 0.257f * rm + 0.504f * gm + 0.098f * bm + 16; //between 16 and 235
-                float um = - ( 0.148f * rm ) - ( 0.291f * gm ) + ( 0.439f * bm ) + 128;
-                float vm = ( 0.439f * rm ) - ( 0.368f * gm ) - ( 0.071f * bm ) + 128;
-
-                float ys = 0.257f * rs + 0.504f * gs + 0.098f * bs + 16; //between 16 and 235
-                float us = - ( 0.148f * rs ) - ( 0.291f * gs ) + ( 0.439f * bs ) + 128;
-                float vs = ( 0.439f * rs ) - ( 0.368f * gs ) - ( 0.071f * bs ) + 128;
-                float color_sigma = 35.f;
-                color_sigma *= color_sigma;
-                float color_reg = std::exp ( ( -0.5f * ( um - us ) * ( um - us ) ) / ( color_sigma ) ) * std::exp ( ( -0.5f * ( vm - vs ) * ( vm - vs ) ) / ( color_sigma ) );
-
-                double thresholdPt2PtDist = 0.01;
-                if ( pt2ptDist > thresholdPt2PtDist )
-                {
-                    //insert Threshold
-                    //std::cout << pt2ptDist << std::endl;
-                    unused.push_back ( static_cast<int> ( ptId ) );
-                    continue;
-                    pt2ptDist = thresholdPt2PtDist;
-                }
-
-                overlap += pt2ptDist / thresholdPt2PtDist + beta * ( 1.f - dot_prod ) + ( 1.f - color_reg );
-                pt2ptDistSUM += pt2ptDist / thresholdPt2PtDist;
-                dot_prodSUM += beta * ( 1.f - dot_prod );
-                color_regSUM += ( 1.f - color_reg );
-                n_points_used++;
-            }
-            else
-            {
-                unused.push_back ( static_cast<int> ( ptId ) );
-            }
-        }
-    }
-
-    //std::sort(scene_points_indices.begin(),scene_points_indices.end());
-    //scene_points_indices.erase( std::unique( scene_points_indices.begin(), scene_points_indices.end() ), scene_points_indices.end() );
-    //pcl::copyPointCloud(*grph[*it_vrtx].pScenePCl, scene_points_indices, pScenePCl_knn);
-
-    std::cout << "N points used: " << n_points_used << ";  ptp2ptDist: " << pt2ptDistSUM / n_points_used << ";   dot_prod: " << dot_prodSUM
-              / n_points_used << ";   color: " << color_regSUM / n_points_used << std::endl;
-    return overlap / static_cast<float> ( n_points_used ) + ( 1.f - std::min ( 0.5f, n_points_used / static_cast<float> ( unused.size () ) ) );
 }
 
 void multiviewGraph::joyCallback ( const scitos_apps_msgs::action_buttons& msg )
@@ -1229,7 +1064,6 @@ void multiviewGraph::kinectCallback ( const sensor_msgs::PointCloud2& msg )
 
 int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const std::string scene_name )
 {
-
     ROS_INFO ( "I am recognizing" );
 
     recognition_service::recognize srv;
@@ -1237,10 +1071,14 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
     sensor_msgs::PointCloud2 output;
     Vertex vrtx = boost::add_vertex ( grph_ );
     Vertex vrtx_final = boost::add_vertex ( grph_final_ );
-    grph_[vrtx].pScenePCl.reset ( new pcl::PointCloud<pcl::PointXYZRGB>() );
-
 
     current_cloud_mutex_.lock();
+    if (current_cloud_->empty())
+    {
+        PCL_WARN("Point cloud is empty!");
+        return -1;
+    }
+
     pcl::toROSMsg ( *current_cloud_, output );
     //*(grph_[vrtx].pScenePCl) = *current_cloud_;
 
@@ -1256,28 +1094,26 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
 
     current_cloud_mutex_.unlock();
 
-    recorded_clouds_++;
-
     if ( !scene_name.empty() )
     {
-        grph_[vrtx].scene_filename = scene_name;
+        grph_[vrtx].scene_filename_ = scene_name;
     }
     else
     {
         std::stringstream filename;
         filename << "scene_" << recorded_clouds_;
-        grph_[vrtx].scene_filename = filename.str();
+        grph_[vrtx].scene_filename_ = filename.str();
     }
-    vertices_v_.push_back ( vrtx );
     srv.request.cloud = output;
+    recorded_clouds_++;
 
     if ( client_.call ( srv ) )
     {
-        std::vector<Eigen::Matrix4f> transforms;
-        std::vector<std::string> model_ids;
+        //std::vector<Eigen::Matrix4f> transforms;
+        //std::vector<std::string> model_ids;
         std::vector<Edge> new_edges;
 
-        if ( srv.response.ids.size() ==0 )
+        if ( srv.response.ids.size() == 0 )
         {
             ROS_INFO ( "I didn't detect any object in the current scene." );
         }
@@ -1287,7 +1123,7 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
             {
                 std_msgs::String object_id = ( std_msgs::String ) srv.response.ids[i];
                 ROS_INFO ( "I detected object %s in the scene.", object_id.data.c_str() );
-                model_ids.push_back ( srv.response.ids[i].data );
+                //model_ids.push_back ( srv.response.ids[i].data );
 
                 Eigen::Matrix4f tt;
                 tt.setIdentity ( 4,4 );
@@ -1303,26 +1139,35 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                 Eigen::Matrix3f rot = q.toRotationMatrix();
                 tt.block<3,3> ( 0,0 ) = rot;
 
-                transforms.push_back ( tt );
+                //transforms.push_back ( tt );
 
                 std::stringstream model_name;
-                model_name << models_dir_ << model_ids.back();
-                Hypothesis hypothesis ( model_name.str(), tt, grph_[vrtx].scene_filename, false );
+                model_name << models_dir_ << srv.response.ids[i].data;
+                Hypothesis hypothesis ( model_name.str(), tt, grph_[vrtx].scene_filename_, false );
                 grph_[vrtx].hypothesis.push_back ( hypothesis );
             }
-
-            createEdgesFromHypothesisMatchOnline ( vertices_v_, grph_, new_edges );
         }
 
+        //---Normal estimation actually redundant because is also calculated in the single view recognition service
         pcl::NormalEstimationOMP<PointT, pcl::Normal> ne;
         ne.setRadiusSearch ( 0.02f );
-        ne.setInputCloud ( grph_[vrtx_final].pScenePCl );
-        ne.compute ( * ( grph_[vrtx_final].pSceneNormals ) );
+        ne.setInputCloud ( grph_[vrtx].pScenePCl );
+        ne.compute ( * ( grph_[vrtx].pSceneNormals ) );
+
+
+        ROS_WARN("There are %ld vertices in the grph.", num_vertices(grph_));
+        vertex_iter vertexIt, vertexEnd;
+        boost::tie(vertexIt, vertexEnd) = vertices(grph_);
+        for (; vertexIt != vertexEnd; ++vertexIt){
+            std::cout << grph_[*vertexIt].scene_filename_ << std::endl;
+        }
+
+        createEdgesFromHypothesisMatchOnline ( vrtx, grph_, new_edges );
 
         //----------create-edges-between-views-by-SIFT-----------------------------------
-        calcFeatures ( vertices_v_.back(), grph_ );
+        calcFeatures ( vrtx, grph_ );
 
-        if ( vertices_v_.size() > 1 )
+        if (0)//num_vertices(grph_)>1)
         {
             flann::Matrix<float> flann_data;
             flann::Index<DistT> *flann_index;
@@ -1330,19 +1175,23 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
             flann_index = new flann::Index<DistT> ( flann_data, flann::KDTreeIndexParams ( 4 ) );
             flann_index->buildIndex ();
 
-            #pragma omp parallel for
-            for ( size_t vertex_id = 0; vertex_id < vertices_v_.size() - 1; vertex_id++ )
+            //#pragma omp parallel for
+            vertex_iter vertexIt, vertexEnd;
+            for (boost::tie(vertexIt, vertexEnd) = vertices(grph_); vertexIt != vertexEnd; ++vertexIt)
             {
                 Eigen::Matrix4f transformation;
                 Edge edge;
-                estimateViewTransformationBySIFT ( vertices_v_[vertex_id], vrtx, grph_, flann_index, transformation, edge );
-                new_edges.push_back ( edge );
+                if( grph_final_[*vertexIt].scene_filename_.compare ( grph_final_[vrtx].scene_filename_ ) != 0 )
+                {
+                    estimateViewTransformationBySIFT ( *vertexIt, vrtx, grph_, flann_index, transformation, edge );
+                    new_edges.push_back ( edge );
+                }
             }
             delete flann_index;
         }
         //----------END-create-edges-between-views-by-SIFT-----------------------------------
 
-        calcEdgeWeight ( new_edges, grph_);
+        calcEdgeWeight (grph_);
         outputgraph ( grph_, "complete_graph.dot" );
 
         //---copy-vertices-to-graph_final----------------------------
@@ -1351,7 +1200,7 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
         //grph_final[vrtx_final].pSceneNormal = grph[vrtx].pSceneNormal;
         grph_final_[vrtx_final].pSceneNormals = grph_[vrtx].pSceneNormals;
         //grph_final[vrtx_final].pScenePCl_f_ds = grph[vrtx].pScenePCl_f_ds;
-        grph_final_[vrtx_final].scene_filename = grph_[vrtx].scene_filename;
+        grph_final_[vrtx_final].scene_filename_ = grph_[vrtx].scene_filename_;
         grph_final_[vrtx_final].hypothesis = grph_[vrtx].hypothesis;
         grph_final_[vrtx_final].pKeypoints = grph_[vrtx].pKeypoints;
         grph_final_[vrtx_final].keypoints_indices_ = grph_[vrtx].keypoints_indices_;
@@ -1359,13 +1208,14 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
         //std::vector<Edge> edges_final;
         //calcMST (edges_, grph_, edges_final);
 
-        //outputgraph (grph_, hypothesis_file.c_str ());
+        //        outputgraph (grph_, hypothesis_file.c_str ());
 
         //---copy-edges-that-are-left-after-MST-calculation-to-the-final-graph-------------------------------------------------------------
         //#pragma omp parallel for
 
-        if ( vertices_v_.size() >1 )
+        if ( num_vertices(grph_) >1 )
         {
+            //----find best edge from the freshly inserted ones and add it to the final graph
             Edge best_edge;
             best_edge = new_edges[0];
 
@@ -1379,8 +1229,6 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                 }
             }
 
-            //for (size_t edgeVec_id = 0; edgeVec_id < edges_final.size (); edgeVec_id++)
-            //{
             Vertex vrtx_src, vrtx_trgt;
             vrtx_src = source ( best_edge, grph_ );
             vrtx_trgt = target ( best_edge, grph_ );
@@ -1394,60 +1242,98 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
             grph_final_[e_cpy].model_name = grph_[best_edge].model_name;
             grph_final_[e_cpy].source_id = grph_[best_edge].source_id;
             grph_final_[e_cpy].target_id = grph_[best_edge].target_id;
+            grph_final_[e_cpy].edge_weight_has_been_calculated_ = grph_[best_edge].edge_weight_has_been_calculated_;
             //}
             best_edges_.push_back ( best_edge );
             outputgraph ( grph_final_, "prune_graph.dot" );
 
             //------Extend-hypotheses-from-other-view(s)------------------------------------------
-            extendHypothesis ( grph_final_ );
+            typename graph_traits<Graph>::out_edge_iterator out_i, out_end;
+
+            tie ( out_i, out_end ) = out_edges ( vrtx_final, grph_final_ );    //There should only be one edge
+
+            std::cout << "Best edge: " << grph_final_[*out_i].edge_weight << " coming from edge " << grph_final_[*out_i].model_name << std::endl;
+            //            if ( out_i != out_end-1 )
+            //            {
+            //                PCL_WARN("Something's crazy.");
+            //            }
+            grph_final_[vrtx_final].has_been_hopped_ = true;
+            std::vector<Hypothesis> all_hypotheses = extendHypothesisRecursive ( grph_final_, *out_i );
+
+            for(std::vector<Hypothesis>::const_iterator it_all_hyp = all_hypotheses.begin(); it_all_hyp != all_hypotheses.end(); ++it_all_hyp)
+            {
+                grph_[vrtx].hypothesis.push_back(*it_all_hyp);
+                grph_final_[vrtx_final].hypothesis.push_back(*it_all_hyp);
+            }
+            ROS_INFO ("There are %ld hypotheses in the current view after extension, whereby %ld have been extended.",
+                      grph_final_[vrtx_final].hypothesis.size(), all_hypotheses.size());
+
+            grph_[vrtx].cumulative_weight_to_new_vrtx_ = grph_final_[vrtx_final].cumulative_weight_to_new_vrtx_;
         }
+
+
+        std::pair<vertex_iter, vertex_iter> vp;
+        for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first )
+        {
+            //-reset-hop-status
+            grph_final_ [*vp.first].has_been_hopped_ = false;
+        }
+
 
         //Refine hypotheses that where extended
         if ( icp_iter_ > 0 )
         {
             std::pair<vertex_iter, vertex_iter> vp;
-            for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first )
+            bool current_iteration_done = false;
+            for ( vp = vertices ( grph_final_ ); (vp.first != vp.second) && (!current_iteration_done); ++vp.first )
             {
-		if ( ! do_reverse_hyp_extension)	// It only applies ICP on the latest scene point cloud
-		{
-		  vp.first = vp.second - 1;
-		}
-                std::cout << "Hypotheses in this frame after extension:" << grph_final_[*vp.first].hypothesis.size () << std::endl;
+                Vertex vrtx_tmp;
 
-                #pragma omp parallel for num_threads(8)
-                for ( size_t kk = 0; kk < grph_final_[*vp.first].hypothesis.size (); kk++ )
+                if ( ! do_reverse_hyp_extension)	// It only applies ICP on the latest scene point cloud
                 {
-                    if ( !grph_final_[*vp.first].hypothesis[kk].extended_ )
+                    vrtx_tmp = vrtx_final;
+                    current_iteration_done = true;
+                }
+                else
+                {
+                    vrtx_tmp = *vp.first;
+                }
+                std::cout << "Hypotheses in this frame after extension:" << grph_final_[vrtx_tmp].hypothesis.size () << std::endl;
+
+#pragma omp parallel for num_threads(8)
+                for ( size_t kk = 0; kk < grph_final_[vrtx_tmp].hypothesis.size (); kk++ )
+                {
+                    if ( !grph_final_[vrtx_tmp].hypothesis[kk].extended_ )
                         continue;
 
                     std::vector < std::string > strs_2;
-                    boost::split ( strs_2, grph_final_[*vp.first].hypothesis[kk].model_id_, boost::is_any_of ( "/\\" ) );
+                    boost::split ( strs_2, grph_final_[vrtx_tmp].hypothesis[kk].model_id_, boost::is_any_of ( "/\\" ) );
                     ModelTPtr model;
                     bool found = models_source_->getModelById ( strs_2[strs_2.size () - 1], model );
-		    
+
                     if ( found )
                     {
                         boost::shared_ptr < distance_field::PropagationDistanceField<pcl::PointXYZRGB> > dt;
                         model->getVGDT ( dt );
 
                         faat_pcl::rec_3d_framework::VoxelBasedCorrespondenceEstimation<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr
-                        est (
-                            new faat_pcl::rec_3d_framework::VoxelBasedCorrespondenceEstimation<
-                            pcl::PointXYZRGB,
-                            pcl::PointXYZRGB> () );
+                                est (
+                                    new faat_pcl::rec_3d_framework::VoxelBasedCorrespondenceEstimation<
+                                    pcl::PointXYZRGB,
+                                    pcl::PointXYZRGB> () );
 
                         pcl::registration::CorrespondenceRejectorSampleConsensus<pcl::PointXYZRGB>::Ptr
-                        rej (
-                            new pcl::registration::CorrespondenceRejectorSampleConsensus<
-                            pcl::PointXYZRGB> () );
+                                rej (
+                                    new pcl::registration::CorrespondenceRejectorSampleConsensus<
+                                    pcl::PointXYZRGB> () );
 
-                        Eigen::Matrix4f scene_to_model_trans = grph_final_[*vp.first].hypothesis[kk].transform_.inverse ();
+                        Eigen::Matrix4f scene_to_model_trans = grph_final_[vrtx_tmp].hypothesis[kk].transform_.inverse ();
 
                         pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud;
                         dt->getInputCloud ( cloud );
 
                         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_voxelized_icp_transformed ( new pcl::PointCloud<pcl::PointXYZRGB> () );
-                        pcl::transformPointCloud ( *grph_final_[*vp.first].pScenePCl, *cloud_voxelized_icp_transformed, scene_to_model_trans );
+                        pcl::transformPointCloud ( *grph_final_[vrtx_tmp].pScenePCl, *cloud_voxelized_icp_transformed, scene_to_model_trans );
 
                         est->setVoxelRepresentationTarget ( dt );
                         est->setInputSource ( cloud_voxelized_icp_transformed );
@@ -1480,449 +1366,462 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                         Eigen::Matrix4f trans, icp_trans;
                         trans = reg.getFinalTransformation () * scene_to_model_trans;
                         icp_trans = trans.inverse ();
-                        grph_final_[*vp.first].hypothesis[kk].transform_ = icp_trans;
+                        grph_final_[vrtx_tmp].hypothesis[kk].transform_ = icp_trans;
                     }
                 }
             }
         }
 
 
-        if ( go_3d_ )
-        {
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> );
-            createBigPointCloud ( grph_final_, big_cloud );
+        //        if ( go_3d_ )
+        //        {
+        //            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //            createBigPointCloud ( grph_final_, big_cloud );
 
-            float leaf = 0.005f;
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_vx ( new pcl::PointCloud<pcl::PointXYZRGB> );
-            pcl::VoxelGrid<pcl::PointXYZRGB> sor;
-            sor.setLeafSize ( leaf, leaf, leaf );
-            sor.setInputCloud ( big_cloud );
-            sor.filter ( *big_cloud_vx );
+        //            float leaf = 0.005f;
+        //            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_vx ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //            pcl::VoxelGrid<pcl::PointXYZRGB> sor;
+        //            sor.setLeafSize ( leaf, leaf, leaf );
+        //            sor.setInputCloud ( big_cloud );
+        //            sor.filter ( *big_cloud_vx );
 
-            std::pair<vertex_iter, vertex_iter> vp;
-            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> object_clouds;
-            std::vector<pcl::PointCloud<pcl::Normal>::Ptr> normals_clouds;
-            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> scene_clouds;
-            for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first )
-            {
+        //            std::pair<vertex_iter, vertex_iter> vp;
+        //            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> object_clouds;
+        //            std::vector<pcl::PointCloud<pcl::Normal>::Ptr> normals_clouds;
+        //            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> scene_clouds;
+        //            for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first )
+        //            {
 
-                std::cout << grph_final_[*vp.first].pKeypoints->points.size() << std::endl;
-                Eigen::Vector4f table_plane;
-                computeTablePlane ( grph_final_[*vp.first].pScenePCl, table_plane );
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> ( *grph_final_[*vp.first].pScenePCl ) );
+        //                std::cout << grph_final_[*vp.first].pKeypoints->points.size() << std::endl;
+        //                Eigen::Vector4f table_plane;
+        //                computeTablePlane ( grph_final_[*vp.first].pScenePCl, table_plane );
+        //                pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> ( *grph_final_[*vp.first].pScenePCl ) );
 
-                pcl::PointIndices above_plane;
-                for ( size_t kk = 0; kk < trans_cloud->points.size (); kk++ )
-                {
+        //                pcl::PointIndices above_plane;
+        //                for ( size_t kk = 0; kk < trans_cloud->points.size (); kk++ )
+        //                {
 
-                    Eigen::Vector3f xyz_p = trans_cloud->points[kk].getVector3fMap ();
+        //                    Eigen::Vector3f xyz_p = trans_cloud->points[kk].getVector3fMap ();
 
-                    if ( !pcl_isfinite ( xyz_p[0] ) || !pcl_isfinite ( xyz_p[1] ) || !pcl_isfinite ( xyz_p[2] ) )
-                        continue;
+        //                    if ( !pcl_isfinite ( xyz_p[0] ) || !pcl_isfinite ( xyz_p[1] ) || !pcl_isfinite ( xyz_p[2] ) )
+        //                        continue;
 
-                    float val = xyz_p[0] * table_plane[0] + xyz_p[1] * table_plane[1] + xyz_p[2] * table_plane[2] + table_plane[3];
+        //                    float val = xyz_p[0] * table_plane[0] + xyz_p[1] * table_plane[1] + xyz_p[2] * table_plane[2] + table_plane[3];
 
-                    if ( val <= -0.01 )
-                    {
-                        trans_cloud->points[kk].x = std::numeric_limits<float>::quiet_NaN ();
-                        trans_cloud->points[kk].y = std::numeric_limits<float>::quiet_NaN ();
-                        trans_cloud->points[kk].z = std::numeric_limits<float>::quiet_NaN ();
-                    }
-                    else
-                    {
-                        above_plane.indices.push_back ( kk );
-                    }
-                }
+        //                    if ( val <= -0.01 )
+        //                    {
+        //                        trans_cloud->points[kk].x = std::numeric_limits<float>::quiet_NaN ();
+        //                        trans_cloud->points[kk].y = std::numeric_limits<float>::quiet_NaN ();
+        //                        trans_cloud->points[kk].z = std::numeric_limits<float>::quiet_NaN ();
+        //                    }
+        //                    else
+        //                    {
+        //                        above_plane.indices.push_back ( kk );
+        //                    }
+        //                }
 
-                pcl::PointCloud<pcl::Normal>::Ptr normal_cloud ( new pcl::PointCloud<pcl::Normal> ( *grph_final_[*vp.first].pSceneNormals ) );
-                pcl::PointCloud<pcl::Normal>::Ptr normal_cloud_trans ( new pcl::PointCloud<pcl::Normal>() );
-                transformNormals ( normal_cloud, normal_cloud_trans, grph_final_[*vp.first].absolute_pose );
+        //                pcl::PointCloud<pcl::Normal>::Ptr normal_cloud ( new pcl::PointCloud<pcl::Normal> ( *grph_final_[*vp.first].pSceneNormals ) );
+        //                pcl::PointCloud<pcl::Normal>::Ptr normal_cloud_trans ( new pcl::PointCloud<pcl::Normal>() );
+        //                transformNormals ( normal_cloud, normal_cloud_trans, grph_final_[*vp.first].absolute_pose );
 
-                if ( mv_keypoints_ == 0 )
-                    //using SIFT keypoints
-                {
-                    //compute indices to original cloud (to address normals) that are not farther away that 1.3
-                    std::vector<int> sift_indices = grph_final_[*vp.first].keypoints_indices_.indices;
-                    std::vector<int> original_indices;
+        //                if ( mv_keypoints_ == 0 )
+        //                    //using SIFT keypoints
+        //                {
+        //                    //compute indices to original cloud (to address normals) that are not farther away that 1.3
+        //                    std::vector<int> sift_indices = grph_final_[*vp.first].keypoints_indices_.indices;
+        //                    std::vector<int> original_indices;
 
-                    for ( size_t kk=0; kk < sift_indices.size(); kk++ )
-                    {
-                        if ( trans_cloud->points[sift_indices[kk]].z > 1.3f )
-                            continue;
+        //                    for ( size_t kk=0; kk < sift_indices.size(); kk++ )
+        //                    {
+        //                        if ( trans_cloud->points[sift_indices[kk]].z > 1.3f )
+        //                            continue;
 
-                        if ( !pcl_isfinite ( trans_cloud->points[sift_indices[kk]].z ) )
-                            continue;
+        //                        if ( !pcl_isfinite ( trans_cloud->points[sift_indices[kk]].z ) )
+        //                            continue;
 
-                        original_indices.push_back ( sift_indices[kk] );
-                    }
+        //                        original_indices.push_back ( sift_indices[kk] );
+        //                    }
 
-                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 ( new pcl::PointCloud<pcl::PointXYZRGB>() );
-                    pcl::copyPointCloud ( *trans_cloud, original_indices, *trans_cloud2 );
+        //                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 ( new pcl::PointCloud<pcl::PointXYZRGB>() );
+        //                    pcl::copyPointCloud ( *trans_cloud, original_indices, *trans_cloud2 );
 
-                    pcl::transformPointCloud ( *trans_cloud2, *trans_cloud, grph_final_[*vp.first].absolute_pose );
-                    pcl::copyPointCloud ( *normal_cloud_trans, original_indices, *normal_cloud );
+        //                    pcl::transformPointCloud ( *trans_cloud2, *trans_cloud, grph_final_[*vp.first].absolute_pose );
+        //                    pcl::copyPointCloud ( *normal_cloud_trans, original_indices, *normal_cloud );
 
-                    std::cout << normal_cloud->points.size() << " " << trans_cloud->points.size() << std::endl;
-                }
-                else if ( mv_keypoints_ == 1 )
-                {
-                    //using RGB edges
-                    std::vector<int> edge_indices;
-                    registration_utils::getRGBEdges<pcl::PointXYZRGB> ( grph_final_[*vp.first].pScenePCl, edge_indices, 100, 150, 1.3f );
-                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 ( new pcl::PointCloud<pcl::PointXYZRGB> );
-                    pcl::copyPointCloud ( *grph_final_[*vp.first].pScenePCl, edge_indices, *trans_cloud2 );
-                    pcl::transformPointCloud ( *trans_cloud2, *trans_cloud, grph_final_[*vp.first].absolute_pose );
-                    pcl::copyPointCloud ( *normal_cloud_trans, edge_indices, *normal_cloud );
-                }
-                else if ( mv_keypoints_ == 2 )
-                {
-                    //using harris corners, not correctly implemented!
-                    /*cv::Mat_ < cv::Vec3b > colorImage;
-                    PCLOpenCV::ConvertPCLCloud2Image<pcl::PointXYZRGB> (grph_final[*vp.first].pScenePCl, colorImage);
-                    cv::Mat grayImage;
-                    cv::cvtColor (colorImage, grayImage, CV_BGR2GRAY);
-                    int blockSize = 2;
-                    int apertureSize = 3;
-                    double k = 0.04;
-                    cv::Mat dst, dst_norm, dst_norm_scaled;
-                    cv::cornerHarris (grayImage, dst, blockSize, apertureSize, k, cv::BORDER_DEFAULT);
+        //                    std::cout << normal_cloud->points.size() << " " << trans_cloud->points.size() << std::endl;
+        //                }
+        //                else if ( mv_keypoints_ == 1 )
+        //                {
+        //                    //using RGB edges
+        //                    std::vector<int> edge_indices;
+        //                    registration_utils::getRGBEdges<pcl::PointXYZRGB> ( grph_final_[*vp.first].pScenePCl, edge_indices, 100, 150, 1.3f );
+        //                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //                    pcl::copyPointCloud ( *grph_final_[*vp.first].pScenePCl, edge_indices, *trans_cloud2 );
+        //                    pcl::transformPointCloud ( *trans_cloud2, *trans_cloud, grph_final_[*vp.first].absolute_pose );
+        //                    pcl::copyPointCloud ( *normal_cloud_trans, edge_indices, *normal_cloud );
+        //                }
+        //                else if ( mv_keypoints_ == 2 )
+        //                {
+        //                    //using harris corners, not correctly implemented!
+        //                    /*cv::Mat_ < cv::Vec3b > colorImage;
+        //                    PCLOpenCV::ConvertPCLCloud2Image<pcl::PointXYZRGB> (grph_final[*vp.first].pScenePCl, colorImage);
+        //                    cv::Mat grayImage;
+        //                    cv::cvtColor (colorImage, grayImage, CV_BGR2GRAY);
+        //                    int blockSize = 2;
+        //                    int apertureSize = 3;
+        //                    double k = 0.04;
+        //                    cv::Mat dst, dst_norm, dst_norm_scaled;
+        //                    cv::cornerHarris (grayImage, dst, blockSize, apertureSize, k, cv::BORDER_DEFAULT);
 
-                    cv::normalize (dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat ());
-                    cv::convertScaleAbs (dst_norm, dst_norm_scaled);
+        //                    cv::normalize (dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat ());
+        //                    cv::convertScaleAbs (dst_norm, dst_norm_scaled);
 
-                    std::vector<int> edge_indices;
-                    float thresh = 150;
-                    /// Drawing a circle around corners
-                    for (int j = 0; j < dst_norm.rows; j++)
-                    {
-                        for (int i = 0; i < dst_norm.cols; i++)
-                        {
-                            if ((int)dst_norm.at<float> (j, i) > thresh)
-                            {
-                                int u, v;
-                                v = i;
-                                u = j;
-                                if (pcl_isfinite(grph_final[*vp.first].pScenePCl->at(u,v).z)
-                                        && pcl_isfinite(grph_final[*vp.first].pScenePCl->at(u,v).x)
-                                        && pcl_isfinite(grph_final[*vp.first].pScenePCl->at(u,v).y))
-                                {
-                                    edge_indices.push_back (u * grph_final[*vp.first].pScenePCl->width + v);
-                                }
-                            }
-                        }
-                    }
+        //                    std::vector<int> edge_indices;
+        //                    float thresh = 150;
+        //                    /// Drawing a circle around corners
+        //                    for (int j = 0; j < dst_norm.rows; j++)
+        //                    {
+        //                        for (int i = 0; i < dst_norm.cols; i++)
+        //                        {
+        //                            if ((int)dst_norm.at<float> (j, i) > thresh)
+        //                            {
+        //                                int u, v;
+        //                                v = i;
+        //                                u = j;
+        //                                if (pcl_isfinite(grph_final[*vp.first].pScenePCl->at(u,v).z)
+        //                                        && pcl_isfinite(grph_final[*vp.first].pScenePCl->at(u,v).x)
+        //                                        && pcl_isfinite(grph_final[*vp.first].pScenePCl->at(u,v).y))
+        //                                {
+        //                                    edge_indices.push_back (u * grph_final[*vp.first].pScenePCl->width + v);
+        //                                }
+        //                            }
+        //                        }
+        //                    }
 
-                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 (new pcl::PointCloud<pcl::PointXYZRGB>);
-                    pcl::copyPointCloud (*grph_final[*vp.first].pScenePCl, edge_indices, *trans_cloud2);
-                    pcl::transformPointCloud (*trans_cloud2, *trans_cloud, grph_final[*vp.first].absolute_pose);*/
-                }
+        //                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 (new pcl::PointCloud<pcl::PointXYZRGB>);
+        //                    pcl::copyPointCloud (*grph_final[*vp.first].pScenePCl, edge_indices, *trans_cloud2);
+        //                    pcl::transformPointCloud (*trans_cloud2, *trans_cloud, grph_final[*vp.first].absolute_pose);*/
+        //                }
 
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 ( new pcl::PointCloud<pcl::PointXYZRGB> ( *trans_cloud ) );
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr scene_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> ( *grph_final_[*vp.first].pScenePCl ) );
+        //                pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud2 ( new pcl::PointCloud<pcl::PointXYZRGB> ( *trans_cloud ) );
+        //                pcl::PointCloud<pcl::PointXYZRGB>::Ptr scene_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> ( *grph_final_[*vp.first].pScenePCl ) );
 
-                float w_t = 0.9f;
-                bool depth_edges = true;
-                float max_angle = 70.f;
-                float lateral_sigma = 0.002f;
+        //                float w_t = 0.9f;
+        //                bool depth_edges = true;
+        //                float max_angle = 70.f;
+        //                float lateral_sigma = 0.002f;
 
-                faat_pcl::utils::noise_models::NguyenNoiseModel<pcl::PointXYZRGB> nm;
-                nm.setInputCloud ( scene_cloud );
-                nm.setInputNormals ( normal_cloud );
-                nm.setLateralSigma ( lateral_sigma );
-                nm.setMaxAngle ( max_angle );
-                nm.setUseDepthEdges ( depth_edges );
-                nm.compute();
+        //                faat_pcl::utils::noise_models::NguyenNoiseModel<pcl::PointXYZRGB> nm;
+        //                nm.setInputCloud ( scene_cloud );
+        //                nm.setInputNormals ( normal_cloud );
+        //                nm.setLateralSigma ( lateral_sigma );
+        //                nm.setMaxAngle ( max_angle );
+        //                nm.setUseDepthEdges ( depth_edges );
+        //                nm.compute();
 
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered;
-                nm.getFilteredCloudRemovingPoints ( filtered, w_t );
+        //                pcl::PointCloud<pcl::PointXYZRGB>::Ptr filtered;
+        //                nm.getFilteredCloudRemovingPoints ( filtered, w_t );
 
-                pcl::transformPointCloud ( *filtered, *scene_cloud, grph_final_[*vp.first].absolute_pose );
+        //                pcl::transformPointCloud ( *filtered, *scene_cloud, grph_final_[*vp.first].absolute_pose );
 
-                scene_clouds.push_back ( scene_cloud );
-                object_clouds.push_back ( trans_cloud2 );
-                normals_clouds.push_back ( normal_cloud );
-            }
+        //                scene_clouds.push_back ( scene_cloud );
+        //                object_clouds.push_back ( trans_cloud2 );
+        //                normals_clouds.push_back ( normal_cloud );
+        //            }
 
-            //refine registered scene clouds simulatenously and adapt transforms
-            std::vector < std::vector<bool> > A;
-            A.resize ( object_clouds.size () );
-            for ( size_t i = 0; i < object_clouds.size (); i++ )
-                A[i].resize ( object_clouds.size (), true );
+        //            //refine registered scene clouds simulatenously and adapt transforms
+        //            std::vector < std::vector<bool> > A;
+        //            A.resize ( object_clouds.size () );
+        //            for ( size_t i = 0; i < object_clouds.size (); i++ )
+        //                A[i].resize ( object_clouds.size (), true );
 
-            faat_pcl::registration_utils::computeOverlapMatrix<pcl::PointXYZRGB> ( object_clouds, A, 0.01, false );
+        //            faat_pcl::registration_utils::computeOverlapMatrix<pcl::PointXYZRGB> ( object_clouds, A, 0.01, false );
 
-            for ( size_t i = 0; i < object_clouds.size (); i++ )
-            {
-                for ( size_t j = 0; j < object_clouds.size (); j++ )
-                    std::cout << ( int ) A[i][j] << " ";
-                std::cout << std::endl;
-            }
+        //            for ( size_t i = 0; i < object_clouds.size (); i++ )
+        //            {
+        //                for ( size_t j = 0; j < object_clouds.size (); j++ )
+        //                    std::cout << ( int ) A[i][j] << " ";
+        //                std::cout << std::endl;
+        //            }
 
-            float dt_size = 0.002f;
-            float inlier_threshold = 0.005f;
-            float max_corresp_dist = 0.01f;
+        //            float dt_size = 0.002f;
+        //            float inlier_threshold = 0.005f;
+        //            float max_corresp_dist = 0.01f;
 
-            std::vector < Eigen::Matrix4f > transformations;
-            transformations.resize ( object_clouds.size(), Eigen::Matrix4f::Identity() );
+        //            std::vector < Eigen::Matrix4f > transformations;
+        //            transformations.resize ( object_clouds.size(), Eigen::Matrix4f::Identity() );
 
-            {
-                faat_pcl::registration::MVNonLinearICP<PointT> icp_nl ( dt_size );
-                icp_nl.setInlierThreshold ( inlier_threshold );
-                icp_nl.setMaxCorrespondenceDistance ( max_corresp_dist );
-                icp_nl.setClouds ( object_clouds );
-                icp_nl.setInputNormals ( normals_clouds );
-                icp_nl.setVisIntermediate ( false );
-                icp_nl.setSparseSolver ( true );
-                icp_nl.setMaxIterations ( 5 );
-                icp_nl.setAdjacencyMatrix ( A );
-                icp_nl.setMinDot ( 0.5f );
-                icp_nl.compute ();
-                icp_nl.getTransformation ( transformations );
-            }
+        //            {
+        //                faat_pcl::registration::MVNonLinearICP<PointT> icp_nl ( dt_size );
+        //                icp_nl.setInlierThreshold ( inlier_threshold );
+        //                icp_nl.setMaxCorrespondenceDistance ( max_corresp_dist );
+        //                icp_nl.setClouds ( object_clouds );
+        //                icp_nl.setInputNormals ( normals_clouds );
+        //                icp_nl.setVisIntermediate ( false );
+        //                icp_nl.setSparseSolver ( true );
+        //                icp_nl.setMaxIterations ( 5 );
+        //                icp_nl.setAdjacencyMatrix ( A );
+        //                icp_nl.setMinDot ( 0.5f );
+        //                icp_nl.compute ();
+        //                icp_nl.getTransformation ( transformations );
+        //            }
 
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_before_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_after_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_points_used_for_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_before_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_after_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_points_used_for_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
 
-            for ( size_t i=0; i < object_clouds.size(); i++ )
-            {
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> );
-                pcl::transformPointCloud ( *scene_clouds[i], *trans_cloud, transformations[i] );
-                *big_cloud_after_mv += *trans_cloud;
-                *big_cloud_before_mv += *scene_clouds[i];
-		{
-                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> );
-                    pcl::transformPointCloud ( *object_clouds[i], *trans_cloud, transformations[i] );
-                    *big_cloud_points_used_for_mv += *trans_cloud;
-		}
-            }
+        //            for ( size_t i=0; i < object_clouds.size(); i++ )
+        //            {
+        //                pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //                pcl::transformPointCloud ( *scene_clouds[i], *trans_cloud, transformations[i] );
+        //                *big_cloud_after_mv += *trans_cloud;
+        //                *big_cloud_before_mv += *scene_clouds[i];
+        //                {
+        //                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr trans_cloud ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //                    pcl::transformPointCloud ( *object_clouds[i], *trans_cloud, transformations[i] );
+        //                    *big_cloud_points_used_for_mv += *trans_cloud;
+        //                }
+        //            }
 
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_vx_after_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
-            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_vx_before_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
-            {
-                pcl::VoxelGrid<pcl::PointXYZRGB> sor;
-                sor.setLeafSize ( leaf, leaf, leaf );
+        //            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_vx_after_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //            pcl::PointCloud<pcl::PointXYZRGB>::Ptr big_cloud_vx_before_mv ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //            {
+        //                pcl::VoxelGrid<pcl::PointXYZRGB> sor;
+        //                sor.setLeafSize ( leaf, leaf, leaf );
 
-                sor.setInputCloud ( big_cloud_after_mv );
-                sor.filter ( *big_cloud_vx_after_mv );
+        //                sor.setInputCloud ( big_cloud_after_mv );
+        //                sor.filter ( *big_cloud_vx_after_mv );
 
-                sor.setInputCloud ( big_cloud_before_mv );
-                sor.filter ( *big_cloud_vx_before_mv );
-            }
+        //                sor.setInputCloud ( big_cloud_before_mv );
+        //                sor.filter ( *big_cloud_vx_before_mv );
+        //            }
 
-            if ( visualize_output_ )
-            {
-                pcl::visualization::PCLVisualizer vis ( "registered cloud" );
-                int v1, v2, v3;
-                vis.createViewPort ( 0, 0, 0.33, 1, v1 );
-                vis.createViewPort ( 0.33, 0, 0.66, 1, v2 );
-                vis.createViewPort ( 0.66, 0, 1, 1, v3 );
+        //            if ( visualize_output_ )
+        //            {
+        //                pcl::visualization::PCLVisualizer vis ( "registered cloud" );
+        //                int v1, v2, v3;
+        //                vis.createViewPort ( 0, 0, 0.33, 1, v1 );
+        //                vis.createViewPort ( 0.33, 0, 0.66, 1, v2 );
+        //                vis.createViewPort ( 0.66, 0, 1, 1, v3 );
 
-                pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler ( big_cloud_points_used_for_mv );
-                vis.addPointCloud ( big_cloud_points_used_for_mv, handler, "big", v1 );
-                pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler2 ( big_cloud_vx_after_mv );
-                vis.addPointCloud ( big_cloud_vx_after_mv, handler2, "big_mv", v2 );
-                pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler3 ( big_cloud_vx_before_mv );
-                vis.addPointCloud ( big_cloud_vx_before_mv, handler3, "keypoints_mv", v3 );
+        //                pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler ( big_cloud_points_used_for_mv );
+        //                vis.addPointCloud ( big_cloud_points_used_for_mv, handler, "big", v1 );
+        //                pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler2 ( big_cloud_vx_after_mv );
+        //                vis.addPointCloud ( big_cloud_vx_after_mv, handler2, "big_mv", v2 );
+        //                pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler3 ( big_cloud_vx_before_mv );
+        //                vis.addPointCloud ( big_cloud_vx_before_mv, handler3, "keypoints_mv", v3 );
 
-                vis.spin ();
-            }
+        //                vis.spin ();
+        //            }
 
-            //visualize the model hypotheses
-            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr> aligned_models;
-            std::vector < std::string > ids;
-            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr> occlusion_clouds;
-            std::vector < Eigen::Matrix4f > transforms_to_global;
-            std::vector< Eigen::Matrix4f > hypotheses_poses_in_global_frame;
+        //            //visualize the model hypotheses
+        //            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr> aligned_models;
+        //            std::vector < std::string > ids;
+        //            std::vector<pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr> occlusion_clouds;
+        //            std::vector < Eigen::Matrix4f > transforms_to_global;
+        //            std::vector< Eigen::Matrix4f > hypotheses_poses_in_global_frame;
 
-            std::vector<int> hyp_index_to_vp;
-            int kk=0;
-            for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first, kk++ )
-            {
-                std::cout << *vp.first << " " << kk << std::endl;
-                occlusion_clouds.push_back ( grph_final_[*vp.first].pScenePCl );
-                transforms_to_global.push_back ( transformations[kk] * grph_final_[*vp.first].absolute_pose );
+        //            std::vector<int> hyp_index_to_vp;
+        //            int kk=0;
+        //            for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first, kk++ )
+        //            {
+        //                std::cout << *vp.first << " " << kk << std::endl;
+        //                occlusion_clouds.push_back ( grph_final_[*vp.first].pScenePCl );
+        //                transforms_to_global.push_back ( transformations[kk] * grph_final_[*vp.first].absolute_pose );
 
-                for ( std::vector<Hypothesis>::iterator it_hyp = grph_final_[*vp.first].hypothesis.begin (); it_hyp != grph_final_[*vp.first].hypothesis.end (); ++it_hyp )
-                {
-                    int vector_id = it_hyp - grph_final_[*vp.first].hypothesis.begin ();
+        //                for ( std::vector<Hypothesis>::iterator it_hyp = grph_final_[*vp.first].hypothesis.begin (); it_hyp != grph_final_[*vp.first].hypothesis.end (); ++it_hyp )
+        //                {
+        //                    int vector_id = it_hyp - grph_final_[*vp.first].hypothesis.begin ();
 
-                    if ( it_hyp->extended_ )
-                        continue;
+        //                    if ( it_hyp->extended_ )
+        //                        continue;
 
-                    PointInTPtr pModelPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
-                    PointInTPtr pModelPCl2 ( new pcl::PointCloud<pcl::PointXYZRGB> );
-                    pcl::io::loadPCDFile ( it_hyp->model_id_, * ( pModelPCl ) );
+        //                    PointInTPtr pModelPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //                    PointInTPtr pModelPCl2 ( new pcl::PointCloud<pcl::PointXYZRGB> );
+        //                    pcl::io::loadPCDFile ( it_hyp->model_id_, * ( pModelPCl ) );
 
-                    Eigen::Matrix4f trans = transformations[kk] * grph_final_[*vp.first].absolute_pose * it_hyp->transform_;
-                    pcl::transformPointCloud ( *pModelPCl, *pModelPCl, trans );
+        //                    Eigen::Matrix4f trans = transformations[kk] * grph_final_[*vp.first].absolute_pose * it_hyp->transform_;
+        //                    pcl::transformPointCloud ( *pModelPCl, *pModelPCl, trans );
 
-                    pcl::VoxelGrid<pcl::PointXYZRGB> sor;
-                    sor.setLeafSize ( leaf, leaf, leaf );
-                    sor.setInputCloud ( pModelPCl );
-                    sor.filter ( *pModelPCl2 );
+        //                    pcl::VoxelGrid<pcl::PointXYZRGB> sor;
+        //                    sor.setLeafSize ( leaf, leaf, leaf );
+        //                    sor.setInputCloud ( pModelPCl );
+        //                    sor.filter ( *pModelPCl2 );
 
-                    hypotheses_poses_in_global_frame.push_back ( trans );
-                    aligned_models.push_back ( pModelPCl2 );
-                    ids.push_back ( it_hyp->model_id_ );
-                    hyp_index_to_vp.push_back ( *vp.first );
-                }
-            }
+        //                    hypotheses_poses_in_global_frame.push_back ( trans );
+        //                    aligned_models.push_back ( pModelPCl2 );
+        //                    ids.push_back ( it_hyp->model_id_ );
+        //                    hyp_index_to_vp.push_back ( *vp.first );
+        //                }
+        //            }
 
-            std::cout << "number of hypotheses for GO3D:" << aligned_models.size() << std::endl;
-            if ( aligned_models.size() > 0 )
-            {
+        //            std::cout << "number of hypotheses for GO3D:" << aligned_models.size() << std::endl;
+        //            if ( aligned_models.size() > 0 )
+        //            {
 
-                //Refine aligned models with ICP
-                for ( size_t kk=0; kk < aligned_models.size(); kk++ )
-                {
-                    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
-                    icp.setInputTarget ( big_cloud_vx_after_mv );
-                    icp.setInputSource ( aligned_models[kk] );
-                    icp.setMaxCorrespondenceDistance ( 0.015f );
-                    icp.setMaximumIterations ( 15 );
-                    icp.setRANSACIterations ( 1000 );
-                    icp.setEuclideanFitnessEpsilon ( 1e-9 );
-                    icp.setTransformationEpsilon ( 1e-9 );
-                    pcl::PointCloud < PointT >::Ptr model_aligned ( new pcl::PointCloud<PointT> );
-                    icp.align ( *model_aligned );
+        //                //Refine aligned models with ICP
+        //                for ( size_t kk=0; kk < aligned_models.size(); kk++ )
+        //                {
+        //                    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
+        //                    icp.setInputTarget ( big_cloud_vx_after_mv );
+        //                    icp.setInputSource ( aligned_models[kk] );
+        //                    icp.setMaxCorrespondenceDistance ( 0.015f );
+        //                    icp.setMaximumIterations ( 15 );
+        //                    icp.setRANSACIterations ( 1000 );
+        //                    icp.setEuclideanFitnessEpsilon ( 1e-9 );
+        //                    icp.setTransformationEpsilon ( 1e-9 );
+        //                    pcl::PointCloud < PointT >::Ptr model_aligned ( new pcl::PointCloud<PointT> );
+        //                    icp.align ( *model_aligned );
 
-                    Eigen::Matrix4f icp_trans;
-                    icp_trans = icp.getFinalTransformation();
-                    hypotheses_poses_in_global_frame[kk] = icp_trans * hypotheses_poses_in_global_frame[kk];
-                    aligned_models[kk] = model_aligned;
-                }
+        //                    Eigen::Matrix4f icp_trans;
+        //                    icp_trans = icp.getFinalTransformation();
+        //                    hypotheses_poses_in_global_frame[kk] = icp_trans * hypotheses_poses_in_global_frame[kk];
+        //                    aligned_models[kk] = model_aligned;
+        //                }
 
-                /*pcl::io::savePCDFileBinary("big_cloud.pcd", *big_cloud_after_mv);
-                for(size_t kk=0; kk < occlusion_clouds.size(); kk++)
-                {
-                    {
-                        std::stringstream original_cloud_name;
-                        original_cloud_name << "cloud_" << std::setw(4) << std::setfill('0') << kk << ".pcd";
-                        pcl::io::savePCDFileBinary(original_cloud_name.str(), *occlusion_clouds[kk]);
-                    }
+        //                /*pcl::io::savePCDFileBinary("big_cloud.pcd", *big_cloud_after_mv);
+        //                for(size_t kk=0; kk < occlusion_clouds.size(); kk++)
+        //                {
+        //                    {
+        //                        std::stringstream original_cloud_name;
+        //                        original_cloud_name << "cloud_" << std::setw(4) << std::setfill('0') << kk << ".pcd";
+        //                        pcl::io::savePCDFileBinary(original_cloud_name.str(), *occlusion_clouds[kk]);
+        //                    }
 
-                    {
-                        std::stringstream original_cloud_name;
-                        original_cloud_name << "transformation_" << std::setw(4) << std::setfill('0') << kk << ".txt";
-                        faat_pcl::utils::writeMatrixToFile(original_cloud_name.str(), transforms_to_global[kk]);
-                    }
-                }
+        //                    {
+        //                        std::stringstream original_cloud_name;
+        //                        original_cloud_name << "transformation_" << std::setw(4) << std::setfill('0') << kk << ".txt";
+        //                        faat_pcl::utils::writeMatrixToFile(original_cloud_name.str(), transforms_to_global[kk]);
+        //                    }
+        //                }
 
-                for(size_t kk=0; kk < aligned_models.size(); kk++)
-                {
-                    {
-                        std::stringstream original_cloud_name;
-                        original_cloud_name << "model_" << std::setw(4) << std::setfill('0') << kk << ".pcd";
-                        pcl::io::savePCDFileBinary(original_cloud_name.str(), *aligned_models[kk]);
-                    }
-                }*/
+        //                for(size_t kk=0; kk < aligned_models.size(); kk++)
+        //                {
+        //                    {
+        //                        std::stringstream original_cloud_name;
+        //                        original_cloud_name << "model_" << std::setw(4) << std::setfill('0') << kk << ".pcd";
+        //                        pcl::io::savePCDFileBinary(original_cloud_name.str(), *aligned_models[kk]);
+        //                    }
+        //                }*/
 
-                //Instantiate HV go 3D, reimplement addModels that will reason about occlusions
-                //Set occlusion cloudS!!
-                //Set the absolute poses so we can go from the global coordinate system to the occlusion clouds
-                //TODO: Normals might be a problem!! We need normals from the models and normals from the scene, correctly oriented!
-                //right now, all normals from the scene will be oriented towards some weird 0, same for models actually
-                faat_pcl::GO3D<PointT, PointT> go;
-                go.setResolution ( leaf );
-                go.setAbsolutePoses ( transforms_to_global );
-                go.setOcclusionsClouds ( occlusion_clouds );
-                go.setZBufferSelfOcclusionResolution ( 250 );
-                go.setInlierThreshold ( 0.0075f );
-                go.setRadiusClutter ( 0.035f );
-                go.setDetectClutter ( false ); //Attention, detect clutter turned off!
-                go.setRegularizer ( 3.f );
-                go.setClutterRegularizer ( 3.f );
-                go.setHypPenalty ( 0.f );
-                go.setIgnoreColor ( false );
-                go.setColorSigma ( 0.25f );
-                go.setOptimizerType ( opt_type_ );
-                go.setObjectIds ( ids );
-                //go.setSceneCloud (big_cloud);
-                go.setSceneCloud ( big_cloud_after_mv );
-                go.addModels ( aligned_models, true );
-                go.verify ();
-                std::vector<bool> mask;
-                go.getMask ( mask );
+        //                //Instantiate HV go 3D, reimplement addModels that will reason about occlusions
+        //                //Set occlusion cloudS!!
+        //                //Set the absolute poses so we can go from the global coordinate system to the occlusion clouds
+        //                //TODO: Normals might be a problem!! We need normals from the models and normals from the scene, correctly oriented!
+        //                //right now, all normals from the scene will be oriented towards some weird 0, same for models actually
+        //                faat_pcl::GO3D<PointT, PointT> go;
+        //                go.setResolution ( leaf );
+        //                go.setAbsolutePoses ( transforms_to_global );
+        //                go.setOcclusionsClouds ( occlusion_clouds );
+        //                go.setZBufferSelfOcclusionResolution ( 250 );
+        //                go.setInlierThreshold ( 0.0075f );
+        //                go.setRadiusClutter ( 0.035f );
+        //                go.setDetectClutter ( false ); //Attention, detect clutter turned off!
+        //                go.setRegularizer ( 3.f );
+        //                go.setClutterRegularizer ( 3.f );
+        //                go.setHypPenalty ( 0.f );
+        //                go.setIgnoreColor ( false );
+        //                go.setColorSigma ( 0.25f );
+        //                go.setOptimizerType ( opt_type_ );
+        //                go.setObjectIds ( ids );
+        //                //go.setSceneCloud (big_cloud);
+        //                go.setSceneCloud ( big_cloud_after_mv );
+        //                go.addModels ( aligned_models, true );
+        //                go.verify ();
+        //                std::vector<bool> mask;
+        //                go.getMask ( mask );
 
-                if ( visualize_output_ )
-                {
-                    pcl::visualization::PCLVisualizer vis ( "registered cloud" );
-                    int v1, v2, v3, v4;
-                    vis.createViewPort ( 0, 0, 0.5, 0.5, v1 );
-                    vis.createViewPort ( 0.5, 0, 1, 0.5, v2 );
-                    vis.createViewPort ( 0, 0.5, 0.5, 1, v3 );
-                    vis.createViewPort ( 0.5, 0.5, 1, 1, v4 );
+        //                if ( visualize_output_ )
+        //                {
+        //                    pcl::visualization::PCLVisualizer vis ( "registered cloud" );
+        //                    int v1, v2, v3, v4;
+        //                    vis.createViewPort ( 0, 0, 0.5, 0.5, v1 );
+        //                    vis.createViewPort ( 0.5, 0, 1, 0.5, v2 );
+        //                    vis.createViewPort ( 0, 0.5, 0.5, 1, v3 );
+        //                    vis.createViewPort ( 0.5, 0.5, 1, 1, v4 );
 
-                    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler ( big_cloud_after_mv );
-                    vis.addPointCloud ( big_cloud_after_mv, handler, "big", v1 );
+        //                    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler ( big_cloud_after_mv );
+        //                    vis.addPointCloud ( big_cloud_after_mv, handler, "big", v1 );
 
-                    /*pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler (big_cloud_vx_after_mv);
-                    vis.addPointCloud (big_cloud_vx_after_mv, handler, "big", v1);*/
+        //                    /*pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler (big_cloud_vx_after_mv);
+        //                    vis.addPointCloud (big_cloud_vx_after_mv, handler, "big", v1);*/
 
-                    for ( size_t i=0; i < aligned_models.size(); i++ )
-                    {
-                        pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified ( aligned_models[i] );
-                        std::stringstream name;
-                        name << "Hypothesis_model_" << i;
-                        vis.addPointCloud<pcl::PointXYZRGB> ( aligned_models[i], handler_rgb_verified, name.str (), v2 );
-                    }
+        //                    for ( size_t i=0; i < aligned_models.size(); i++ )
+        //                    {
+        //                        pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified ( aligned_models[i] );
+        //                        std::stringstream name;
+        //                        name << "Hypothesis_model_" << i;
+        //                        vis.addPointCloud<pcl::PointXYZRGB> ( aligned_models[i], handler_rgb_verified, name.str (), v2 );
+        //                    }
 
-                    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr smooth_cloud_ =  go.getSmoothClustersRGBCloud();
-                    if ( smooth_cloud_ )
-                    {
-                        pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGBA> random_handler ( smooth_cloud_ );
-                        vis.addPointCloud<pcl::PointXYZRGBA> ( smooth_cloud_, random_handler, "smooth_cloud", v4 );
-                    }
+        //                    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr smooth_cloud_ =  go.getSmoothClustersRGBCloud();
+        //                    if ( smooth_cloud_ )
+        //                    {
+        //                        pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGBA> random_handler ( smooth_cloud_ );
+        //                        vis.addPointCloud<pcl::PointXYZRGBA> ( smooth_cloud_, random_handler, "smooth_cloud", v4 );
+        //                    }
 
-                    for ( size_t i = 0; i < mask.size (); i++ )
-                    {
-                        if ( mask[i] )
-                        {
-                            std::cout << "Verified:" << ids[i] << std::endl;
-                            pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified ( aligned_models[i] );
-                            std::stringstream name;
-                            name << "verified" << i;
-                            vis.addPointCloud<pcl::PointXYZRGB> ( aligned_models[i], handler_rgb_verified, name.str (), v3 );
-                        }
-                    }
+        //                    for ( size_t i = 0; i < mask.size (); i++ )
+        //                    {
+        //                        if ( mask[i] )
+        //                        {
+        //                            std::cout << "Verified:" << ids[i] << std::endl;
+        //                            pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb_verified ( aligned_models[i] );
+        //                            std::stringstream name;
+        //                            name << "verified" << i;
+        //                            vis.addPointCloud<pcl::PointXYZRGB> ( aligned_models[i], handler_rgb_verified, name.str (), v3 );
+        //                        }
+        //                    }
 
-                    vis.spin ();
-                }
+        //                    vis.spin ();
+        //                }
 
-                for ( size_t i = 0; i < mask.size (); i++ )
-                {
-                    if ( mask[i] )
-                    {
-                        int k=0;
-                        for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first, k++ )
-                        {
-                            //hypotheses_poses_in_global_frame[i] transforms from object coordinates to global coordinate system
-                            //transforms_to_global aligns a single frame to the global coordinate system
-                            //transformation would then be a transformation transforming first the object to global coordinate system
-                            //concatenated with the inverse of transforms_to_global[k]
-                            Eigen::Matrix4f t = transforms_to_global[k].inverse() * hypotheses_poses_in_global_frame[i];
-                            std::string origin = "3d go";
-                            Hypothesis hyp ( ids[i], t, origin, true, true );
-                            grph_final_[*vp.first].hypothesis.push_back ( hyp );
-                        }
-                    }
-                }
-            }
-        }
-        else
+        //                for ( size_t i = 0; i < mask.size (); i++ )
+        //                {
+        //                    if ( mask[i] )
+        //                    {
+        //                        int k=0;
+        //                        for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first, k++ )
+        //                        {
+        //                            //hypotheses_poses_in_global_frame[i] transforms from object coordinates to global coordinate system
+        //                            //transforms_to_global aligns a single frame to the global coordinate system
+        //                            //transformation would then be a transformation transforming first the object to global coordinate system
+        //                            //concatenated with the inverse of transforms_to_global[k]
+        //                            Eigen::Matrix4f t = transforms_to_global[k].inverse() * hypotheses_poses_in_global_frame[i];
+        //                            std::string origin = "3d go";
+        //                            Hypothesis hyp ( ids[i], t, origin, true, true );
+        //                            grph_final_[*vp.first].hypothesis.push_back ( hyp );
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //        else
         {
             //---Verify-extended-hypotheses-and-visualize------------------------
+            bool current_iteration_done = false;
+
             std::pair<vertex_iter, vertex_iter> vp;
-            for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first )
+            for ( vp = vertices ( grph_final_ ); (vp.first != vp.second) && (!current_iteration_done); ++vp.first )
             {
+
+                Vertex vrtx_tmp;
+
+                if ( ! do_reverse_hyp_extension)	// It only applies ICP on the latest scene point cloud
+                {
+                    vrtx_tmp = vrtx_final;
+                    current_iteration_done = true;
+                }
+                else
+                {
+                    vrtx_tmp = *vp.first;
+                }
 
                 std::vector<pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr> aligned_models;
                 std::vector < std::string > ids;
 
-                for ( std::vector<Hypothesis>::iterator it_hyp = grph_final_[*vp.first].hypothesis.begin (); it_hyp != grph_final_[*vp.first].hypothesis.end (); ++it_hyp )
+                for ( std::vector<Hypothesis>::iterator it_hyp = grph_final_[vrtx_tmp].hypothesis.begin (); it_hyp != grph_final_[vrtx_tmp].hypothesis.end (); ++it_hyp )
                 {
-                    int vector_id = it_hyp - grph_final_[*vp.first].hypothesis.begin ();
                     PointInTPtr pModelPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
                     PointInTPtr pModelPCl2 ( new pcl::PointCloud<pcl::PointXYZRGB> );
                     pcl::io::loadPCDFile ( it_hyp->model_id_, * ( pModelPCl ) );
@@ -1938,18 +1837,18 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                     aligned_models.push_back ( pModelPCl2 );
                     ids.push_back ( it_hyp->model_id_ );
                 }
-                std::cout << "View " << boost::get ( vertex_index, grph_final_, *vp.first ) << " has " << grph_final_[*vp.first].hypothesis.size ()
+                std::cout << "View " << grph_final_[vrtx_tmp].scene_filename_ << " has " << grph_final_[vrtx_tmp].hypothesis.size ()
                           << " hypothesis. " << std::endl;
 
                 //initialize go
                 float go_resolution_ = 0.005f;
                 bool add_planes = true;
                 float assembled_resolution = 0.003f;
-                float color_sigma = 0.25f;
+                float color_sigma = 0.5f;
 
                 boost::shared_ptr<faat_pcl::GlobalHypothesesVerification_1<PointT, PointT> > go (
-                    new faat_pcl::GlobalHypothesesVerification_1<PointT,
-                    PointT> );
+                            new faat_pcl::GlobalHypothesesVerification_1<PointT,
+                            PointT> );
 
                 go->setSmoothSegParameters ( 0.1, 0.035, 0.005 );
                 //go->setRadiusNormals(0.03f);
@@ -1972,16 +1871,16 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
 
                 //Multiplane segmentation
                 faat_pcl::MultiPlaneSegmentation<PointT> mps;
-                mps.setInputCloud ( grph_final_[*vp.first].pScenePCl );
+                mps.setInputCloud ( grph_final_[vrtx_tmp].pScenePCl );
                 mps.setMinPlaneInliers ( 1000 );
                 mps.setResolution ( go_resolution_ );
-                mps.setNormals ( grph_final_[*vp.first].pSceneNormals );
+                mps.setNormals ( grph_final_[vrtx_tmp].pSceneNormals );
                 mps.setMergePlanes ( true );
                 std::vector<faat_pcl::PlaneModel<PointT> > planes_found;
                 mps.segment();
                 planes_found = mps.getModels();
 
-                if ( planes_found.size() == 0 && grph_final_[*vp.first].pScenePCl->isOrganized() )
+                if ( planes_found.size() == 0 && grph_final_[vrtx_tmp].pScenePCl->isOrganized() )
                 {
                     PCL_WARN ( "No planes found, doing segmentation with standard method\n" );
                     mps.segment ( true );
@@ -1990,12 +1889,12 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
 
                 std::vector<pcl::PointIndices> indices;
                 Eigen::Vector4f table_plane;
-                doSegmentation<PointT> ( grph_final_[*vp.first].pScenePCl, grph_final_[*vp.first].pSceneNormals, indices, table_plane );
+                doSegmentation<PointT> ( grph_final_[vrtx_tmp].pScenePCl, grph_final_[vrtx_tmp].pSceneNormals, indices, table_plane );
 
                 std::vector<int> indices_above_plane;
-                for ( int k = 0; k < grph_final_[*vp.first].pScenePCl->points.size (); k++ )
+                for ( int k = 0; k < grph_final_[vrtx_tmp].pScenePCl->points.size (); k++ )
                 {
-                    Eigen::Vector3f xyz_p = grph_final_[*vp.first].pScenePCl->points[k].getVector3fMap ();
+                    Eigen::Vector3f xyz_p = grph_final_[vrtx_tmp].pScenePCl->points[k].getVector3fMap ();
                     if ( !pcl_isfinite ( xyz_p[0] ) || !pcl_isfinite ( xyz_p[1] ) || !pcl_isfinite ( xyz_p[2] ) )
                         continue;
 
@@ -2005,9 +1904,9 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                 }
 
                 std::vector<std::string> model_ids;
-                typename pcl::PointCloud<PointT>::Ptr occlusion_cloud ( new pcl::PointCloud<PointT> ( *grph_final_[*vp.first].pScenePCl ) );
-                go->setSceneCloud ( grph_final_[*vp.first].pScenePCl );
-                go->setNormalsForClutterTerm ( grph_final_[*vp.first].pSceneNormals );
+                typename pcl::PointCloud<PointT>::Ptr occlusion_cloud ( new pcl::PointCloud<PointT> ( *grph_final_[vrtx_tmp].pScenePCl ) );
+                go->setSceneCloud ( grph_final_[vrtx_tmp].pScenePCl );
+                go->setNormalsForClutterTerm ( grph_final_[vrtx_tmp].pSceneNormals );
                 go->setOcclusionCloud ( occlusion_cloud );
                 //addModels
                 go->addModels ( aligned_models, true );
@@ -2038,28 +1937,35 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                     std::cout << hyp_id << "is" << static_cast<int> ( mask_hv[hyp_id] ) << std::endl;
                     //std::cout << static_cast<int> (mask_hv[j]) << std::endl;
                     if ( !mask_hv[hyp_id] )
-                        continue;
+                    {
+                        grph_final_[vrtx_tmp].hypothesis[hyp_id].verified_ = false;
+                    }
+                    else
+                    {
+                        grph_final_[vrtx_tmp].hypothesis[hyp_id].verified_ = true;
+                    }
 
-                    grph_final_[*vp.first].hypothesis[hyp_id].verified_ = true;
                 }
             }
         }
 
-        outputgraph ( grph_final_, "Final_with_Hypothesis_extension.dot" );
+        //        outputgraph ( grph_final_, "Final_with_Hypothesis_extension.dot" );
 
         if ( visualize_output_ ) //-------Visualize Scene Cloud--------------------
         {
             std::vector<int> viewportNr;
             vis_->removeAllPointClouds();
-            viewportNr = visualization_framework ( vis_, vertices_v_.size(), 4 );
+            viewportNr = visualization_framework ( vis_, num_vertices(grph_), 4 );
 
             std::pair<vertex_iter, vertex_iter> vp;
+            int view_id = -1;
             for ( vp = vertices ( grph_final_ ); vp.first != vp.second; ++vp.first )
             {
+                view_id++;
                 pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> handler_rgb ( grph_final_[*vp.first].pScenePCl );
                 std::stringstream cloud_name;
-                cloud_name << "scene_cloud_" << grph_final_[*vp.first].scene_filename;
-                vis_->addPointCloud<pcl::PointXYZRGB> ( grph_final_[*vp.first].pScenePCl, handler_rgb, cloud_name.str (), viewportNr[boost::get ( vertex_index, grph_final_, *vp.first ) * 4 + 0] );
+                cloud_name << "scene_cloud_" << grph_final_[*vp.first].scene_filename_;
+                vis_->addPointCloud<pcl::PointXYZRGB> ( grph_final_[*vp.first].pScenePCl, handler_rgb, cloud_name.str (), viewportNr[view_id * 4 + 0] );
 
                 for ( size_t hyp_id = 0; hyp_id < grph_final_[*vp.first].hypothesis.size(); hyp_id++ )
                 {
@@ -2071,11 +1977,11 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                     std::stringstream name;
                     name << cloud_name.str() << "___hypothesis_" << hyp_id << "___origin_" << origin;
 
-// 		ModelTPtr m;
+                    // 		ModelTPtr m;
 
-// 		models_source_->getModelById(model_id, m);
-//
-// 		ConstPointInTPtr model_cloud = m->getAssembled (0.003f);
+                    // 		models_source_->getModelById(model_id, m);
+                    //
+                    // 		ConstPointInTPtr model_cloud = m->getAssembled (0.003f);
                     typename pcl::PointCloud<PointT>::Ptr pModelPCl ( new pcl::PointCloud<PointT> );
                     typename pcl::PointCloud<PointT>::Ptr model_aligned ( new pcl::PointCloud<PointT> );
 
@@ -2083,26 +1989,75 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                     pcl::transformPointCloud ( *pModelPCl, *model_aligned, trans );
 
                     pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_handler ( model_aligned );
-                    vis_->addPointCloud<PointT> ( model_aligned, rgb_handler, name.str (), viewportNr[boost::get ( vertex_index, grph_final_, *vp.first ) * 4 +2] );
+                    vis_->addPointCloud<PointT> ( model_aligned, rgb_handler, name.str (), viewportNr[view_id * 4 +2] );
 
-                    if ( grph_final_[*vp.first].hypothesis[hyp_id].origin_.compare ( grph_final_[*vp.first].scene_filename ) == 0 )	//--show-hypotheses-from-single-view
+                    if ( grph_final_[*vp.first].hypothesis[hyp_id].origin_.compare ( grph_final_[*vp.first].scene_filename_ ) == 0 )	//--show-hypotheses-from-single-view
                     {
                         name << "__extended";
                         pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_handler2 ( model_aligned );
-                        vis_->addPointCloud<PointT> ( model_aligned, rgb_handler, name.str (), viewportNr[boost::get ( vertex_index, grph_final_, *vp.first ) * 4 + 1] );
+                        vis_->addPointCloud<PointT> ( model_aligned, rgb_handler, name.str (), viewportNr[view_id * 4 + 1] );
                     }
 
                     if ( grph_final_[*vp.first].hypothesis[hyp_id].verified_ )	//--show-verified-extended-hypotheses
                     {
                         name << "__verified";
                         pcl::visualization::PointCloudColorHandlerRGBField<PointT> rgb_handler3 ( model_aligned );
-                        vis_->addPointCloud<PointT> ( model_aligned, rgb_handler, name.str (), viewportNr[boost::get ( vertex_index, grph_final_, *vp.first ) * 4 + 3] );
+                        vis_->addPointCloud<PointT> ( model_aligned, rgb_handler, name.str (), viewportNr[view_id * 4 + 3] );
                     }
 
                 }
             }
             vis_->spin ();
             //vis->getInteractorStyle()->saveScreenshot ( "singleview.png" );
+        }
+
+        //---CLEAN-UP-GRAPH
+
+        if(num_vertices(grph_) > 2)
+        {
+            Vertex vrtxToKill = getFurthestVertex(grph_);
+
+            std::vector<Edge> edges_to_be_removed;
+            typename graph_traits<Graph>::out_edge_iterator out_i, out_end;
+            for ( tie ( out_i, out_end ) = out_edges ( vrtxToKill, grph_ ); out_i != out_end; ++out_i )
+            {
+                edges_to_be_removed.push_back(*out_i);
+            }
+            typename graph_traits<Graph>::in_edge_iterator in_i, in_end;
+            for ( tie ( in_i, in_end ) = in_edges ( vrtxToKill, grph_ ); in_i != in_end; ++in_i )
+            {
+                edges_to_be_removed.push_back(*in_i);
+            }
+
+
+            for(size_t remover_id = 0; remover_id < edges_to_be_removed.size(); remover_id++)
+            {
+                remove_edge(edges_to_be_removed[remover_id], grph_);
+            }
+
+            remove_vertex(vrtxToKill, grph_);
+
+            Vertex vrtxToKill_final = getFurthestVertex(grph_final_);
+
+            std::vector<Edge> edges_to_be_removed_final;
+
+            for ( tie ( out_i, out_end ) = out_edges ( vrtxToKill_final, grph_final_ ); out_i != out_end; ++out_i )
+            {
+                edges_to_be_removed_final.push_back(*out_i);
+            }
+            for ( tie ( in_i, in_end ) = in_edges ( vrtxToKill_final, grph_final_ ); in_i != in_end; ++in_i )
+            {
+                edges_to_be_removed_final.push_back(*in_i);
+            }
+
+            for(size_t remover_id = 0; remover_id < edges_to_be_removed_final.size(); remover_id++)
+            {
+                remove_edge(edges_to_be_removed_final[remover_id], grph_final_);
+            }
+
+            remove_vertex(vrtxToKill_final, grph_final_);
+            outputgraph ( grph_final_, "final_after_deleting_old_vertex.dot" );
+            outputgraph ( grph_, "grph_after_deleting_old_vertex.dot" );
         }
     }
     else
@@ -2173,8 +2128,8 @@ void multiviewGraph::init ( int argc, char **argv )
 
     if ( visualize_output_ ) //-------Visualize Scene Cloud--------------------
     {
-	vis_.reset ( new pcl::visualization::PCLVisualizer ( "vis1" ) );
-	vis_->setWindowName ( "Recognition from Multiple Views" );
+        vis_.reset ( new pcl::visualization::PCLVisualizer ( "vis1" ) );
+        vis_->setWindowName ( "Recognition from Multiple Views" );
     }
     
     bf::path obj_name_path = input_cloud_dir_;
@@ -2206,5 +2161,5 @@ void multiviewGraph::init ( int argc, char **argv )
         sub_joy_ = n_->subscribe ( "/teleop_joystick/action_buttons", 1, &multiviewGraph::joyCallback, this );
         ROS_INFO ( "Start online recognition of topic %s by pressing a button...", topic_.c_str() );
         ros::spin();
-    }    
+    }
 }

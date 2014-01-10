@@ -1,21 +1,22 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(multiview_recognizer)
+SET (CMAKE_BUILD_TYPE RelWithDebInfo)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs std_msgs scitos_apps_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy sensor_msgs std_msgs scitos_apps_msgs)
 find_package(PCL 1.7 REQUIRED)
 find_package(OpenCV 2.4 REQUIRED )
 
 set(FAAT_PCL_DIR CACHE PATH "FAAT PCL DIR")
 set(FAAT_PCL_DIR_BUILD CACHE PATH "FAAT PCL DIR BUILD")
 
-set(LIB_NAME multiview_recognizer_lib)
-set(SUBSYS_DESC "multiview recognizer library")
-set(SUBSYS_DEPS_PCL common)
+#set(LIB_NAME multiview_recognizer_lib)
+#set(SUBSYS_DESC "multiview recognizer library")
+#set(SUBSYS_DEPS_PCL common)
 #set(SUBSYS_DEPS_FAAT_PCL )
-SET(FOO_LIBRARY_TYPE SHARED)
+#SET(FOO_LIBRARY_TYPE SHARED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -74,7 +75,7 @@ CATKIN_DEPENDS roscpp recognition_service sensor_msgs scitos_apps_msgs
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  include
+  #include
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${PCL_INCLUDE_DIRS}
   ${FAAT_PCL_DIR}/recognition/include 
@@ -96,12 +97,15 @@ set(multiview_recognizer_incs
 set(srcs
   src/main.cpp
   src/myGraphClasses.cpp
+  include/myGraphClasses.h
+  include/pcl_conversions.h
+  include/segmenter.h
 )
 
 link_directories(${PCL_LINK_DIRECTORIES} ${FAAT_PCL_DIR_BUILD}/lib)
 add_definitions(${PCL_DEFINITIONS})
 
-add_library(multiview_recognizer_node ${FOO_LIBRARY_TYPE} ${srcs} ${multiview_recognizer_incs})
+add_executable(multiview_recognizer_node ${srcs})
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -111,10 +115,11 @@ add_library(multiview_recognizer_node ${FOO_LIBRARY_TYPE} ${srcs} ${multiview_re
  target_link_libraries(multiview_recognizer_node
     ${PCL_LIBRARIES} 
     ${OpenCV_LIBS}
-    faat_pcl_3d_rec_frameworkrd 
+    faat_pcl_3d_rec_frameworkrd
     faat_pcl_registrationrd
     faat_pcl_recognitionrd
     faat_pcl_utilsrd siftgpurd
+    ${FAAT_PCL_LIBRARIES}
     ${catkin_LIBRARIES}
  )
 

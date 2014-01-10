@@ -9,7 +9,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/graph/prim_minimum_spanning_tree.hpp>
+//#include <boost/graph/prim_minimum_spanning_tree.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 //#include <pcl/common/common.h>
@@ -101,36 +101,41 @@ public:
     boost::shared_ptr< pcl::PointCloud<FeatureT > > pSignatures;
     boost::shared_ptr< pcl::PointIndices > pIndices_above_plane;
     boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pKeypoints;
-    std::string scene_filename;
+    std::string scene_filename_;
     std::vector<std::string> model_ids;
     std::vector<double> modelToViewCost;
     std::vector<Hypothesis> hypothesis;
     std::vector<Hypothesis> hypothesis_single_unverified;
     Eigen::Matrix4f absolute_pose;
     pcl::PointIndices keypoints_indices_;
+    bool has_been_hopped_;
+    double cumulative_weight_to_new_vrtx_;
 };
 
 class myEdge
 {
 public:
+    myEdge();
     Eigen::Matrix4f transformation;
     double edge_weight;
     std::string model_name;
-    int source_id, target_id;
+    std::string source_id, target_id;
     std::vector <cv::DMatch> matches;
+    bool edge_weight_has_been_calculated_;
 };
 
 using namespace boost;
 namespace bf = boost::filesystem;
-typedef adjacency_list < vecS, vecS, undirectedS, property<vertex_distance_t, int>, property<edge_weight_t, double> > GraphMST;
-typedef graph_traits < GraphMST >::vertex_descriptor VertexMST;
-typedef graph_traits < GraphMST >::edge_descriptor EdgeMST;
+//typedef adjacency_list < listS, listS, undirectedS, property<vertex_distance_t, int>, property<edge_weight_t, double> > GraphMST;
+//typedef graph_traits < GraphMST >::vertex_descriptor VertexMST;
+//typedef graph_traits < GraphMST >::edge_descriptor EdgeMST;
 
 //--"copy"-of-graph-to-save-custom-information------prim_minimum_spanning_tree----cannot(?)-handle-internal-bundled-properties---
 typedef adjacency_list < vecS, vecS, undirectedS, View, myEdge > Graph;
 typedef graph_traits < Graph >::vertex_descriptor Vertex;
 typedef graph_traits < Graph >::edge_descriptor Edge;
 typedef graph_traits<Graph>::vertex_iterator vertex_iter;
+typedef graph_traits<Graph>::edge_iterator edge_iter;
 typedef property_map<Graph, vertex_index_t>::type IndexMap;
 
 typedef faat_pcl::rec_3d_framework::Model<PointT> ModelT;
@@ -150,7 +155,6 @@ class multiviewGraph
 {
 private:
     Graph grph_, grph_final_;
-    std::vector<Vertex> vertices_v_;
     std::vector<Edge> edges_, best_edges_;
     std::string topic_, models_dir_, training_dir_;
     ros::NodeHandle  *n_;
@@ -193,18 +197,17 @@ public:
     void init ( int argc, char **argv );
     bool calcFeatures ( Vertex &src, Graph &grph );
     void estimateViewTransformationBySIFT ( const Vertex &src, const Vertex &trgt, Graph &grph, flann::Index<DistT > *flann_index, Eigen::Matrix4f &transformation, Edge &edge );
-    void selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edges, const Graph &grph, std::vector<Edge> &single_edges );
+//    void selectLowestWeightEdgesFromParallelEdges ( const std::vector<Edge> &parallel_edges, const Graph &grph, std::vector<Edge> &single_edges );
     void extendHypothesis ( Graph &grph );
-    void calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &edges_final );
-    void createEdgesFromHypothesisMatch ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges );
-    void createEdgesFromHypothesisMatchOnline ( const std::vector<Vertex> &vertices_v, Graph &grph, std::vector<Edge> &edges );
-    void calcEdgeWeight ( std::vector<Edge> &edges, Graph &grph);
-    double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl, pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr pOctree, int K=1, double beta = 0.2 );
-    double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl, pcl::search::OrganizedNeighbor<pcl::PointXYZRGB>::Ptr pOrganizedNeighbor, int K=1, double beta=0.2 );
-    double calcRegistrationCost ( pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pInputNormalPCl, pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr pSceneNormalPCl, std::vector<int> & unused, double beta=0.2 );
+    std::vector<Hypothesis> extendHypothesisRecursive ( Graph &grph, Edge calling_out_edge);
+//    void calcMST ( const std::vector<Edge> &edges, const Graph &grph, std::vector<Edge> &edges_final );
+    void createEdgesFromHypothesisMatch ( Graph &grph, std::vector<Edge> &edges );
+    void createEdgesFromHypothesisMatchOnline ( const Vertex new_vertex, Graph &grph, std::vector<Edge> &edges );
+    void calcEdgeWeight (Graph &grph);
     void outputgraph ( Graph& map, const char* filename );
     std::vector<Vertex> my_node_reader ( std::string filename, Graph &g );
     void createBigPointCloud ( Graph & grph_final, pcl::PointCloud<pcl::PointXYZRGB>::Ptr & big_cloud );
+    Vertex getFurthestVertex ( Graph &grph);
 };
 
 
