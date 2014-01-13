@@ -653,22 +653,22 @@ extendHypothesisRecursive ( Graph &grph, Edge calling_out_edge) //is directed ed
     ROS_INFO("Current Vertex %s has a cumulative weight of %lf.", grph[current_vertex].scene_filename_.c_str(), grph[current_vertex].cumulative_weight_to_new_vrtx_);
     for ( tie ( out_i, out_end ) = out_edges ( current_vertex, grph ); out_i != out_end; ++out_i )
     {
-        Vertex targ = target ( *out_i, grph );
+        Vertex new_trgt = target ( *out_i, grph );
 
-        if ( grph[targ].has_been_hopped_ )
+        if ( grph[new_trgt].has_been_hopped_ )
         {
-            ROS_INFO("Vertex %s has already been hopped.", grph[targ].scene_filename_.c_str());
+            ROS_INFO("Vertex %s has already been hopped.", grph[new_trgt].scene_filename_.c_str());
             continue;
         }
-        ROS_INFO("Hopping to vertex %s...", grph[targ].scene_filename_.c_str());
+        ROS_INFO("Hopping to vertex %s...", grph[new_trgt].scene_filename_.c_str());
         std::vector<Hypothesis> new_hypotheses = extendHypothesisRecursive ( grph, *out_i);
         for(std::vector<Hypothesis>::iterator it_new_hyp = new_hypotheses.begin(); it_new_hyp !=new_hypotheses.end(); ++it_new_hyp)
         {
-            if ( grph[calling_out_edge].target_id.compare( grph[current_vertex].scene_filename_ ) == 0)
+            if ( grph[calling_out_edge].source_id.compare( grph[src].scene_filename_ ) == 0)
             {
                 it_new_hyp->transform_ = grph[calling_out_edge].transformation.inverse () * it_new_hyp->transform_ ;
             }
-            else if (grph[calling_out_edge].source_id.compare( grph[current_vertex].scene_filename_ ) == 0)
+            else if (grph[calling_out_edge].target_id.compare( grph[src].scene_filename_ ) == 0)
             {
                 it_new_hyp->transform_ = grph[calling_out_edge].transformation * it_new_hyp->transform_;
             }
@@ -864,7 +864,6 @@ createEdgesFromHypothesisMatch (Graph &grph, std::vector<Edge> &edges )
 void multiviewGraph::
 createEdgesFromHypothesisMatchOnline ( const Vertex new_vertex, Graph &grph, std::vector<Edge> &edges )
 {
-    ROS_INFO("There are %ld vertices to check.", num_vertices(grph));
     vertex_iter vertexItA, vertexEndA;
     for (boost::tie(vertexItA, vertexEndA) = vertices(grph_); vertexItA != vertexEndA; ++vertexItA)
     {
@@ -1213,7 +1212,7 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
         //---copy-edges-that-are-left-after-MST-calculation-to-the-final-graph-------------------------------------------------------------
         //#pragma omp parallel for
 
-        if ( num_vertices(grph_) >1 )
+        if ( num_vertices(grph_) > 1 )
         {
             //----find best edge from the freshly inserted ones and add it to the final graph
             Edge best_edge;
@@ -1823,15 +1822,16 @@ int multiviewGraph::recognize ( pcl::PointCloud<pcl::PointXYZRGB> &cloud, const 
                 for ( std::vector<Hypothesis>::iterator it_hyp = grph_final_[vrtx_tmp].hypothesis.begin (); it_hyp != grph_final_[vrtx_tmp].hypothesis.end (); ++it_hyp )
                 {
                     PointInTPtr pModelPCl ( new pcl::PointCloud<pcl::PointXYZRGB> );
+                    PointInTPtr pModelPClTransformed ( new pcl::PointCloud<pcl::PointXYZRGB> );
                     PointInTPtr pModelPCl2 ( new pcl::PointCloud<pcl::PointXYZRGB> );
                     pcl::io::loadPCDFile ( it_hyp->model_id_, * ( pModelPCl ) );
 
-                    pcl::transformPointCloud ( *pModelPCl, *pModelPCl, it_hyp->transform_ );
+                    pcl::transformPointCloud ( *pModelPCl, *pModelPClTransformed, it_hyp->transform_ );
 
                     pcl::VoxelGrid<pcl::PointXYZRGB> sor;
                     float leaf = 0.005f;
                     sor.setLeafSize ( leaf, leaf, leaf );
-                    sor.setInputCloud ( pModelPCl );
+                    sor.setInputCloud ( pModelPClTransformed );
                     sor.filter ( *pModelPCl2 );
 
                     aligned_models.push_back ( pModelPCl2 );

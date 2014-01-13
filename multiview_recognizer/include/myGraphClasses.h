@@ -92,7 +92,6 @@ class View
 public:
     View();
     //View(const View &view);
-    int foo;
     boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pScenePCl;
 //    boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGBNormal> > pSceneXYZRGBNormal;
     boost::shared_ptr< pcl::PointCloud<pcl::Normal> > pSceneNormals;
@@ -102,7 +101,7 @@ public:
     boost::shared_ptr< pcl::PointIndices > pIndices_above_plane;
     boost::shared_ptr< pcl::PointCloud<pcl::PointXYZRGB> > pKeypoints;
     std::string scene_filename_;
-    std::vector<std::string> model_ids;
+    //std::vector<std::string> model_ids_;
     std::vector<double> modelToViewCost;
     std::vector<Hypothesis> hypothesis;
     std::vector<Hypothesis> hypothesis_single_unverified;
